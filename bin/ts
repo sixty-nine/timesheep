@@ -1,0 +1,41 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__.'/../vendor/autoload.php';
+
+use SixtyNine\Timesheep\Bootstrap;
+use SixtyNine\Timesheep\Helper\Objects;
+use SixtyNine\Timesheep\Command;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Psr\Log\LoggerAwareInterface;
+use Symfony\Component\Console\Application;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+
+$logFile = __DIR__.'/../artefacts/timesheep.log';
+$logger = new Logger('timesheep');
+$logger->pushHandler(new StreamHandler($logFile));
+
+$container = Bootstrap::boostrap($logger);
+
+$application = new Application();
+
+$commands = [
+    new Command\ListProjectsCommand(),
+    new Command\AddProjectCommand(),
+    new Command\RemoveProjectCommand(),
+    new Command\AddEntryCommand(),
+];
+
+foreach ($commands as $command) {
+    $application->add($command);
+    if (Objects::implements($command, LoggerAwareInterface::class)) {
+        $command->setLogger($logger);
+    }
+    if (Objects::implements($command, ContainerAwareInterface::class)) {
+        $command->setContainer($container);
+    }
+}
+
+$application->run();
+

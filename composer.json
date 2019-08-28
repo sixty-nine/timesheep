@@ -1,0 +1,40 @@
+{
+    "name": "sixty-nine/timesheep",
+    "description": "Timesheep",
+    "type": "project",
+    "license": "UNLICENSE",
+    "require": {
+        "php" : "^7.1",
+        "webmozart/assert": "^1.4",
+        "vlucas/phpdotenv": "^3.4",
+        "monolog/monolog": "^1.24",
+        "doctrine/dbal": "^2.9",
+        "doctrine/orm": "^2.6",
+        "symfony/console": "^4.3",
+        "symfony/dependency-injection": "^4.3",
+        "myclabs/deep-copy": "^1.9"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master",
+        "phpunit/phpunit": "^8.2",
+        "squizlabs/php_codesniffer": "~3.4",
+        "phpstan/phpstan": "^0.11.8",
+        "phpspec/phpspec": "^5.1",
+        "behat/behat": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SixtyNine\\": "src/SixtyNine/"
+        }
+    },
+    "scripts": {
+        "check:all": "/bin/sh build/check-all.sh",
+        "check:stan": "vendor/bin/phpstan analyse src --level max",
+        "check:lint": "vendor/bin/phpcs --standard=PSR2 src",
+        "check:lint:fix": "vendor/bin/phpcbf --standard=PSR2 src",
+        "test": "vendor/bin/phpunit -c tests --colors=always",
+        "test:unit": "vendor/bin/phpunit -c tests --testsuite Unit --colors=always",
+        "test:debug": "vendor/bin/phpunit -c tests --colors=always --stop-on-error --stop-on-failure",
+        "test:coverage": "/bin/sh build/generate-coverage.sh"
+    }
+}
