@@ -41,4 +41,13 @@ class DateTime
             sprintf('%s %s:00', $date->format('Y-m-d'), $time->format('H:i'))
         );
     }
+
+    public static function decimalToTime(float $decimal)
+    {
+        return sprintf(
+            '%s:%02s',
+            floor($decimal % 60),
+            round(($decimal - (int)$decimal) * 60)
+        );
+    }
 }

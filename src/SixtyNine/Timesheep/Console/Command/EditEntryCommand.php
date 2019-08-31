@@ -1,6 +1,6 @@
 <?php
 
-namespace SixtyNine\Timesheep\Command;
+namespace SixtyNine\Timesheep\Console\Command;
 
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Storage\Entity\Project;
@@ -12,32 +12,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class ListProjectsCommand extends Command implements ContainerAwareInterface
+class EditEntryCommand extends Command implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    protected static $defaultName = 'proj:list';
+    protected static $defaultName = 'entry:edit';
 
     protected function configure()
     {
         $this
-            ->setDescription('List all the projects.')
-            ->setAliases(['proj:ls']);
+            ->setDescription('Edit an entry.')
+            ->setAliases(['e:edit', 'edit']);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new SymfonyStyle($input, $output);
-        $io->title('Projects');
-        /**
- * @var EntityManager $em
-*/
-        $em = $this->container->get('em');
-        /**
- * @var ProjectRepository $repo
-*/
-        $repo = $em->getRepository(Project::class);
-
-        $io->table(['ID', 'Name'], $repo->findAll());
+        throw new \Exception('Not implemented');
     }
 }

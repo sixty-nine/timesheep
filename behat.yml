@@ -1,0 +1,14 @@
+# behat.yml
+
+default:
+  suites:
+    domain_features:
+      paths:    [ ./features ]
+      contexts: [ FeatureContext ]
+      filters:
+        tags: '~@functional'
+    functional_features:
+      paths:    [ ./features ]
+      contexts: [ DbFeatureContext ]
+      filters:
+        tags: '@functional'

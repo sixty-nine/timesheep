@@ -3,6 +3,7 @@
 require_once __DIR__.'/../../vendor/autoload.php';
 
 use Behat\Behat\Context\Context;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeStepScope;
 use SixtyNine\Timesheep\Bootstrap;
 use SixtyNine\Timesheep\Domain\Model\Entry;
@@ -18,6 +19,10 @@ use function DeepCopy\deep_copy;
  */
 class FeatureContext implements Context
 {
+    use CastingHoursToIntTrait;
+    use CastingDateTrait;
+    use CastingTimeToDateTrait;
+
     /** @var User */
     private $user;
     /** @var Project[] */
@@ -35,9 +40,7 @@ class FeatureContext implements Context
         Bootstrap::boostrap();
     }
 
-    /**
-     * @BeforeStep
-     */
+    /** @BeforeStep */
     public function prepare(BeforeStepScope $scope): void
     {
         if ('the current entry should be unchanged' !== $scope->getStep()->getText()) {
@@ -59,29 +62,11 @@ class FeatureContext implements Context
     }
 
     /**
-     * @Transform /^(-?\d+)h$/
-     */
-    public function castHoursToInt(string $hours): int
-    {
-        return (int)$hours;
-    }
-
-    /**
-     * @Transform /^(\d?\d-\d?\d-\d\d\d\d)$/
-     */
-    public function castDate(string $date)
-    {
-        return new DateTimeImmutable($date);
-    }
-
-    /**
      * @Transform /^(\d?\d:\d\d)$/
      */
-    public function castTimeToDate(string $time): DateTimeImmutable
+    public function castTimeToCurDate(string $time): DateTimeImmutable
     {
-        return new DateTimeImmutable(
-            sprintf('%s %s:00', $this->timesheet->getCurDate()->format('Y-m-d'), $time)
-        );
+        return $this->castTimeToDate($time, $this->timesheet->getCurDate());
     }
 
     /**

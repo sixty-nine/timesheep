@@ -1,6 +1,6 @@
 <?php
 
-namespace SixtyNine\Timesheep\Command;
+namespace SixtyNine\Timesheep\Console\Command;
 
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Storage\Entity\Project;
@@ -24,7 +24,7 @@ class RemoveProjectCommand extends Command implements ContainerAwareInterface
     {
         $this
             ->setDescription('Remove an existing project.')
-            ->setAliases(['proj:rm'])
+            ->setAliases(['proj:rm', 'p:rm'])
             ->addArgument('name', InputArgument::OPTIONAL, 'The project name.')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force the removal.');
     }

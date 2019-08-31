@@ -1,6 +1,6 @@
 <?php
 
-namespace SixtyNine\Timesheep\Command;
+namespace SixtyNine\Timesheep\Console\Command;
 
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Storage\Entity\Project;
@@ -17,26 +17,22 @@ class AddProjectCommand extends Command implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    protected static $defaultName = 'proj:create';
+    protected static $defaultName = 'proj:add';
 
     protected function configure()
     {
         $this
             ->setDescription('Create a new project.')
-            ->setAliases(['proj:add'])
+            ->setAliases(['p:add'])
             ->addArgument('name', InputArgument::OPTIONAL, 'The new project name.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        /**
- * @var EntityManager $em
-*/
+        /** @var EntityManager $em */
         $em = $this->container->get('em');
-        /**
- * @var ProjectRepository $repo
-*/
+        /** @var ProjectRepository $repo */
         $repo = $em->getRepository(Project::class);
         $name = $input->getArgument('name');
 

@@ -1,0 +1,8 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#Call to an undefined method [a-zA-Z0-9\\_]+::setLogger\(\)#'
+			path: %currentWorkingDirectory%/src/SixtyNine/Timesheep/Console/Application.php
+		-
+			message: '#Call to an undefined method [a-zA-Z0-9\\_]+::setContainer\(\)#'
+			path: %currentWorkingDirectory%/src/SixtyNine/Timesheep/Console/Application.php
