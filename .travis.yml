@@ -1,0 +1,16 @@
+language: php
+
+php:
+  - 7.2
+
+before_install:
+  - sudo apt-get update > /dev/null
+
+install:
+  - composer install
+  - cp .env.example .env
+  - mkdir database
+  - touch database/database.db
+  - vendor/bin/doctrine orm:schema-tool:create -q
+
+script: composer check:all
