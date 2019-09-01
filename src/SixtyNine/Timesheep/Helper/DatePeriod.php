@@ -21,7 +21,7 @@ class DatePeriod
         $dow = $date->format('w');
         // FIXME week start
         $from = $dow !== '1' ? $date->modify('last monday') : $date;
-        $to = $dow !== '0' ? $date->modify('next sunday') : $date;
+        $to = $dow !== '0' ? $date->modify('next sunday')->modify('-1 day') : $date;
         return self::getDatePeriod($from, $to);
     }
 

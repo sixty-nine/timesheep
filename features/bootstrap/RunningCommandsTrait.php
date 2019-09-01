@@ -1,0 +1,54 @@
+<?php
+
+use Behat\Gherkin\Node\TableNode;
+use SixtyNine\Timesheep\Console\Application;
+use Symfony\Component\Console\Tester\CommandTester;
+use Webmozart\Assert\Assert;
+
+trait RunningCommandsTrait
+{
+    /** @var int */
+    private $lastCommandStatus = 0;
+    private $lastCommandOutput = '';
+
+    /**
+     * @When /^I call the "([^"]*)" command with (\{[^\}]*\})$/
+     */
+    public function iCallTheCommandWithJson(string $name, string $json)
+    {
+        $commandTester = $this->callCommandWith($name, json_decode($json, true));
+    }
+
+    /**
+     * @When /^I call the "([^"]*)" command with:$/
+     */
+    public function iCallTheCommandWith(string $name, TableNode $table)
+    {
+        $commandTester = $this->callCommandWith($name, array_reduce($table->getRows(), static function ($prev, $item) {
+            return array_merge($prev, [$item[0] => $item[1]]);
+        }, []));
+    }
+
+    /**
+     * @Then /^the command should (succeed|fail)$/
+     */
+    public function theCommandShould($status)
+    {
+        if ('succeed' === $status) {
+            Assert::eq(0, $this->lastCommandStatus);
+        } else {
+            Assert::true(0 < $this->lastCommandStatus);
+        }
+    }
+
+    protected function callCommandWith(string $name, array $args): CommandTester
+    {
+        $app = new Application($this->container);
+        $command = $app->find($name);
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(array_merge(['command' => $name], $args));
+        $this->lastCommandStatus = $commandTester->getStatusCode();
+        $this->lastCommandOutput = $commandTester->getDisplay();
+        return $commandTester;
+    }
+}

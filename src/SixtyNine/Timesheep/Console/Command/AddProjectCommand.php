@@ -44,12 +44,12 @@ class AddProjectCommand extends Command implements ContainerAwareInterface
 
         if (!$name) {
             $io->writeln('Aborted.');
-            return null;
+            return 1;
         }
 
         if ($repo->exists($name)) {
             $io->error(sprintf('The project "%s" already exists', $name));
-            return null;
+            return 1;
         }
 
         $proj = $repo->create($name);

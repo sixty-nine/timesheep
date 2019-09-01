@@ -50,4 +50,14 @@ class DateTime
             round(($decimal - (int)$decimal) * 60)
         );
     }
+
+    public static function getfirstNotNullOrToday(array $dates): DateTimeImmutable
+    {
+        foreach ($dates as $date) {
+            if (null !== $date) {
+                return $date;
+            }
+        }
+        return new DateTimeImmutable();
+    }
 }

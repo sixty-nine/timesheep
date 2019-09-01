@@ -51,17 +51,17 @@ class RemoveProjectCommand extends Command implements ContainerAwareInterface
 
         if (!$name) {
             $io->writeln('Aborted.');
-            return null;
+            return 1;
         }
 
         if (!$repo->exists($name)) {
             $io->error(sprintf('The project "%s" does exists', $name));
-            return null;
+            return 1;
         }
 
         if (!$force && !$io->confirm(sprintf('Are you sure you want to remove the project "%s"', $name), false)) {
             $io->writeln('Aborted');
-            return null;
+            return 1;
         }
 
         $repo->delete($name);

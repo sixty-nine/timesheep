@@ -54,7 +54,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
         $io->title('Add a new entry');
 
         if (!$startEnd = $this->inputTime($input, $io)) {
-            return null;
+            return 1;
         }
 
         [$start, $end] = $startEnd;
@@ -86,12 +86,12 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
                     $firstEntry->getTask()
                 )
             ]);
-            return null;
+            return 1;
         }
 
         if (!$force && !$io->confirm('Is it correct?', false)) {
             $io->writeln('Aborted.');
-            return null;
+            return 1;
         }
 
         $repo->create($startDate, $endDate, $project ?? '', $task ?? '');

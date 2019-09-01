@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Helper\DatePeriod;
+use SixtyNine\Timesheep\Helper\DateTime;
 use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
@@ -31,6 +32,7 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
             ->addOption('to', null, InputOption::VALUE_OPTIONAL, 'To datetime')
             ->addOption('week', null, InputOption::VALUE_NONE, 'This week')
             ->addOption('month', null, InputOption::VALUE_NONE, 'This week')
+            ->addOption('day', null, InputOption::VALUE_NONE, 'This day')
         ;
     }
 
@@ -51,21 +53,13 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
         $to = $toStr ? new DateTimeImmutable($toStr) : null;
 
         if ($input->getOption('week')) {
-            $p = DatePeriod::getWeek(
-                $from ?: (
-                    $to ? $to : new DateTimeImmutable()
-                )
-            );
+            $p = DatePeriod::getWeek(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
             /** @var ?DateTimeImmutable $from */
             $from = $p->start;
             /** @var ?DateTimeImmutable $to */
             $to = $p->end;
         } elseif ($input->getOption('month')) {
-            $p = DatePeriod::getMonth(
-                $from ?: (
-                    $to ? $to : new DateTimeImmutable()
-                )
-            );
+            $p = DatePeriod::getMonth(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
             /** @var ?DateTimeImmutable $from */
             $from = $p->start;
             /** @var ?DateTimeImmutable $to */

@@ -2,6 +2,7 @@
 
 use Behat\Behat\Context\Context;
 use Doctrine\ORM\EntityManager;
+use Psr\Container\ContainerInterface;
 use SixtyNine\Timesheep\Bootstrap;
 use SixtyNine\Timesheep\Helper\Doctrine as DoctrineHelper;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
@@ -13,23 +14,25 @@ class DbFeatureContext implements Context
     use CastingDateTrait;
     use CastingTimeToDateTrait;
     use CastingTimesToSpanTrait;
+    use RunningCommandsTrait;
 
     /** @var EntityManager */
     private $em;
-    /** @var DateTimeImmutable */
-    private $curDate;
     /** @var EntryRepository $entryRepo */
     private $entryRepo;
+    /** @var ContainerInterface */
+    private $container;
 
     public function __construct()
     {
-        $container = Bootstrap::boostrap();
-        $this->em = $container->get('em');
+        $this->container = Bootstrap::boostrap();
+        $this->em = $this->container->get('em');
         $this->entryRepo = $this->em->getRepository(Entry::class);
     }
 
     /**
      * @Given /^I have an empty database$/
+     * @Given /^I my timesheet is empty$/
      */
     public function iHaveAnEmptyDatabase()
     {
@@ -79,5 +82,4 @@ class DbFeatureContext implements Context
     {
         Assert::count($this->entryRepo->findAll(), $number);
     }
-
 }

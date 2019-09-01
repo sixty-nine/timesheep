@@ -103,9 +103,11 @@ SQL;
     {
         return $this
             ->createQueryBuilder('e')
-            ->where('e.start < :start AND e.end > :start')  // start is inside another entry
-            ->orWhere('e.start < :end AND e.end > :end')    // end is inside another entry
-            ->orWhere('e.start = :start OR e.end = :end')   // it's the same entry
+            ->where('e.start < :start AND e.end > :start')   // start is inside another entry
+            ->orWhere('e.start < :end AND e.end > :end')     // end is inside another entry
+            ->orWhere(':start < e.start AND :end > e.start') // other start is inside new
+            ->orWhere(':start < e.end AND :end > e.end')     // other end is inside new
+            ->orWhere('e.start = :start OR e.end = :end')    // it's the same entry
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->getQuery()

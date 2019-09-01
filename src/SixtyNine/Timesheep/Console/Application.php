@@ -16,10 +16,10 @@ class Application extends BaseApp
     const LOGO = "\xF0\x9F\x90\x91";
     /** @var ContainerInterface */
     private $container;
-    /** @var LoggerInterface */
+    /** @var ?LoggerInterface */
     private $logger;
 
-    public function __construct(ContainerInterface $container, LoggerInterface $logger)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger = null)
     {
         parent::__construct('TimeSheep '.self::LOGO, '0.0.0');
         $this->logger = $logger;

@@ -9,9 +9,10 @@ Feature: Creation of db entries
         Given I have an empty database
 
     Scenario:
-        Given I have an entry from 10:00 to 00:00
-         Then I should have an entry from 10:00 to 00:00
+        Given I have an entry from 10:00 to 15:00
+         Then I should have an entry from 10:00 to 15:00
           And I should have 1 entry
+          And I should not be able to create an entry from 09:00 to 18:00
           And I should not be able to create an entry from 11:00 to 12:00
           And I should not be able to create an entry from 9:00 to 12:00
           And I should be able to create an entry from 09:00 to 10:00
