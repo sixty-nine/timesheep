@@ -8,6 +8,38 @@ use SixtyNine\Timesheep\Storage\Entity\Entry;
 
 class EntryRepository extends EntityRepository
 {
+    public function getDuration(DateTimeImmutable $from = null, DateTimeImmutable $to = null)
+    {
+        $sql = <<<SQL
+select
+    cast(
+        round(sum(julianday(end) - julianday(start)) * 24, 2) as FLOAT
+    ) as duration
+    from entries
+SQL;
+
+        $where = [];
+        $params = [];
+
+        if ($from) {
+            $where[] = "start >= '%s'";
+            $params[] = $from->format('Y-m-d h:i:s');
+        }
+        if ($to) {
+            $where[] = "end >= '%s'";
+            $params[] = $to->format('Y-m-d h:i:s');
+        }
+        if ($where) {
+            $sql .= ' where '.implode(' AND ', $where);
+        }
+        $sql = sprintf($sql, ...$params);
+        $stmt = $this->_em->getConnection()->prepare($sql);
+        $stmt->execute();
+        $res = $stmt->fetchAll();
+        $res = reset($res);
+        return (float)$res['duration'];
+    }
+
     public function getAllEntries(DateTimeImmutable $from = null, DateTimeImmutable $to = null)
     {
         $qb = $this
