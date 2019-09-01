@@ -5,6 +5,7 @@ namespace SixtyNine\Timesheep\Console\Command;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
+use SixtyNine\Timesheep\Helper\DatePeriod;
 use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
@@ -42,23 +43,33 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
         /** @var EntryRepository $repo */
         $repo = $em->getRepository(Entry::class);
 
-        /** @var string $from */
-        $from = $input->getOption('from');
-        $from = $from ? new DateTimeImmutable($from) : null;
-        /** @var string $to */
-        $to = $input->getOption('to');
-        $to = $to ? new DateTimeImmutable($to) : null;
+        /** @var string $fromStr */
+        $fromStr = $input->getOption('from');
+        $from = $fromStr ? new DateTimeImmutable($fromStr) : null;
+        /** @var string $toStr */
+        $toStr = $input->getOption('to');
+        $to = $toStr ? new DateTimeImmutable($toStr) : null;
 
         if ($input->getOption('week')) {
-            $from = $from ?? new DateTimeImmutable();
-            $to = $to ?? new DateTimeImmutable();
-            $from = $from->modify('last monday');
-            $to = $to->modify('next sunday'); // FIXME week start
+            $p = DatePeriod::getWeek(
+                $from ?: (
+                    $to ? $to : new DateTimeImmutable()
+                )
+            );
+            /** @var ?DateTimeImmutable $from */
+            $from = $p->start;
+            /** @var ?DateTimeImmutable $to */
+            $to = $p->end;
         } elseif ($input->getOption('month')) {
-            $from = $from ?? new DateTimeImmutable();
-            $to = $to ?? new DateTimeImmutable();
-            $from = $from->modify('first day of this month');
-            $to = $to->modify('last day of this month');
+            $p = DatePeriod::getMonth(
+                $from ?: (
+                    $to ? $to : new DateTimeImmutable()
+                )
+            );
+            /** @var ?DateTimeImmutable $from */
+            $from = $p->start;
+            /** @var ?DateTimeImmutable $to */
+            $to = $p->end;
         }
 
         $entries = $repo->getAllEntries($from, $to);

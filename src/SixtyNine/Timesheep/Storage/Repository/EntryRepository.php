@@ -3,6 +3,7 @@
 namespace SixtyNine\Timesheep\Storage\Repository;
 
 use DateTimeImmutable;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 
@@ -40,7 +41,12 @@ SQL;
         return (float)$res['duration'];
     }
 
-    public function getAllEntries(DateTimeImmutable $from = null, DateTimeImmutable $to = null)
+    /**
+     * @param DateTime|DateTimeImmutable|null $from
+     * @param DateTime|DateTimeImmutable|null $to
+     * @return mixed
+     */
+    public function getAllEntries($from = null, $to = null)
     {
         $qb = $this
             ->createQueryBuilder('e')
