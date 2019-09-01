@@ -66,11 +66,15 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
         $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
         $duration = 0;
         $padding = strlen(' Duration ') - 2;
+        $lastDate = null;
 
-        $rows = array_map(static function (Entry $entry) use (&$duration, $padding) {
+        $rows = array_map(static function (Entry $entry) use (&$duration, &$lastDate, $padding) {
             $duration += $entry->getDecimalDuration();
+            $entryDate = $entry->getStart()->format('Y-m-d');
+            $date = $lastDate !== $entryDate ? $entryDate : '';
+            $lastDate = $entryDate;
             return [
-                $entry->getStart()->format('Y-m-d'),
+                $date,
                 $entry->getStart()->format('H:i'),
                 $entry->getEnd()->format('H:i'),
                 str_pad($entry->getDuration(), $padding, ' ', STR_PAD_LEFT),
