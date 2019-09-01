@@ -31,6 +31,8 @@ bin/ts add "tomorrow 10:00" "tomorrow 11:00"
 bin/ts add "yesterday 10:00" "yesterday 11:00"
 # Entry spawning over multiple days
 bin/ts add "2019-01-01 23:00" "2019-01-02 01:00"
+# Entry 2 days ago
+bin/ts add "2 days ago 08:00" "2 days ago 09:30"
 ```
 
 ### Listing entries
