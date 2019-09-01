@@ -5,3 +5,4 @@ tests/.phpunit.result.cache
 artefacts/
 database/
 .env
+ts.phar
