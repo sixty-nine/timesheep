@@ -5,6 +5,7 @@ use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
 use SixtyNine\Timesheep\Bootstrap;
 use SixtyNine\Timesheep\Helper\Doctrine as DoctrineHelper;
+use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
 use Webmozart\Assert\Assert;
@@ -13,7 +14,7 @@ class DbFeatureContext implements Context
 {
     use CastingDateTrait;
     use CastingTimeToDateTrait;
-    use CastingTimesToSpanTrait;
+    use CastingTimesToPeriodTrait;
     use RunningCommandsTrait;
 
     /** @var EntityManager */
@@ -43,21 +44,19 @@ class DbFeatureContext implements Context
      * @Given /^I have an entry (.*)$/
      * @Given /^I should be able to create an entry (.*)$/
      */
-    public function iHaveAnEntryFromTo(array $startEnd)
+    public function iHaveAnEntryFromTo(Period $period)
     {
-        [$start, $end] = $startEnd;
-        $entry = $this->entryRepo->create($start, $end);
+        $entry = $this->entryRepo->create($period);
     }
 
     /**
      * @Then /^I should not be able to create an entry (.*)$/
      */
-    public function iShouldNotBeAbleToCreateAnEntryFromTo(array $startEnd)
+    public function iShouldNotBeAbleToCreateAnEntryFromTo(Period $period)
     {
-        [$start, $end] = $startEnd;
         try {
             $thrown = false;
-            $this->entryRepo->create($start, $end);
+            $this->entryRepo->create($period);
         } catch (\Exception $ex) {
             $thrown = true;
         }
@@ -68,10 +67,9 @@ class DbFeatureContext implements Context
     /**
      * @Then /^I should have an?(?: new)? entry (.*)$/
      */
-    public function iShouldHaveANewEntryFromTo(array $startEnd)
+    public function iShouldHaveANewEntryFromTo(Period $period)
     {
-        [$start, $end] = $startEnd;
-        $entry = $this->entryRepo->findEntry($start, $end);
+        $entry = $this->entryRepo->findEntry($period);
         Assert::notNull($entry, 'Entry not found');
     }
 

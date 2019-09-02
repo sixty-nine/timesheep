@@ -1,11 +1,13 @@
 <?php
 
-trait CastingTimesToSpanTrait
+use SixtyNine\Timesheep\Model\Period;
+
+trait CastingTimesToPeriodTrait
 {
     /**
      * @transform /^from (.*) to (.*)$/
      */
-    public function castTimesToSpan(string $start, string $end)
+    public function castTimesToPeriod(string $start, string $end): Period
     {
         $startDate = $this->castTimeToDate($start);
         $endDate = $this->castTimeToDate($end);
@@ -13,6 +15,6 @@ trait CastingTimesToSpanTrait
             $endDate = $endDate->modify('+1 day');
         }
 
-        return [$startDate, $endDate];
+        return new Period($startDate, $endDate);
     }
 }

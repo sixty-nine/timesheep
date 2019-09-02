@@ -3,13 +3,14 @@
 namespace SixtyNine\Timesheep\Storage\Repository;
 
 use DateTimeImmutable;
-use DateTime;
 use Doctrine\ORM\EntityRepository;
+use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
+use Webmozart\Assert\Assert;
 
 class EntryRepository extends EntityRepository
 {
-    public function getDuration(DateTimeImmutable $from = null, DateTimeImmutable $to = null)
+    public function getDuration(Period $period)
     {
         $sql = <<<SQL
 select
@@ -22,13 +23,13 @@ SQL;
         $where = [];
         $params = [];
 
-        if ($from) {
+        if ($start = $period->getStart()) {
             $where[] = "start >= '%s'";
-            $params[] = $from->format('Y-m-d h:i:s');
+            $params[] = $start->format('Y-m-d h:i:s');
         }
-        if ($to) {
+        if ($end = $period->getEnd()) {
             $where[] = "end >= '%s'";
-            $params[] = $to->format('Y-m-d h:i:s');
+            $params[] = $end->format('Y-m-d h:i:s');
         }
         if ($where) {
             $sql .= ' where '.implode(' AND ', $where);
@@ -42,41 +43,51 @@ SQL;
     }
 
     /**
-     * @param DateTime|DateTimeImmutable|null $from
-     * @param DateTime|DateTimeImmutable|null $to
+     * @param Period $period
      * @return mixed
      */
-    public function getAllEntries($from = null, $to = null)
+    public function getAllEntries(Period $period)
     {
         $qb = $this
             ->createQueryBuilder('e')
             ->orderBy('e.start')
         ;
-        if ($from) {
-            $qb->andWhere('e.start >= :from')->setParameter('from', $from->setTime(0, 0));
+        /** @var DateTimeImmutable $start */
+        if ($start = $period->getStart()) {
+            $qb
+                ->andWhere('e.start >= :from')
+                ->setParameter('from', $start->setTime(0, 0))
+            ;
         }
-        if ($to) {
-            $qb->andWhere('e.end <= :to')->setParameter('to', $to->setTime(23, 59, 59)->modify('+1 second'));
+        /** @var DateTimeImmutable $end */
+        if ($end = $period->getEnd()) {
+            $qb
+                ->andWhere('e.end <= :to')
+                ->setParameter('to', $end->setTime(23, 59, 59)->modify('+1 second'))
+            ;
         }
         return $qb->getQuery()->execute();
     }
 
     public function create(
-        DateTimeImmutable $start,
-        DateTimeImmutable $end,
+        Period $period,
         string $project = '',
         string $task = '',
         string $description = ''
     ): Entry {
-        $crossingEntries = $this->findCrossingEntries($start, $end);
+        $crossingEntries = $this->findCrossingEntries($period);
         if (0 < count($crossingEntries)) {
             throw new \InvalidArgumentException('Overlapping entry');
         }
 
+        /** @var DateTimeImmutable $start */
+        $start = $period->getStart();
+        Assert::notNull($start, 'An entry must have a start date');
+
         $entry = new Entry();
         $entry
             ->setStart($start)
-            ->setEnd($end)
+            ->setEnd($period->getEnd())
             ->setProject($project)
             ->setTask($task)
             ->setDescription($description)
@@ -87,19 +98,19 @@ SQL;
         return $entry;
     }
 
-    public function findEntry(DateTimeImmutable $start, DateTimeImmutable $end)
+    public function findEntry(Period $period)
     {
         return $this
             ->createQueryBuilder('e')
             ->orWhere('e.start = :start AND e.end = :end')
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
+            ->setParameter('start', $period->getStart())
+            ->setParameter('end', $period->getEnd())
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
 
-    public function findCrossingEntries(DateTimeImmutable $start, DateTimeImmutable $end)
+    public function findCrossingEntries(Period $period)
     {
         return $this
             ->createQueryBuilder('e')
@@ -108,8 +119,8 @@ SQL;
             ->orWhere(':start < e.start AND :end > e.start') // other start is inside new
             ->orWhere(':start < e.end AND :end > e.end')     // other end is inside new
             ->orWhere('e.start = :start OR e.end = :end')    // it's the same entry
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
+            ->setParameter('start', $period->getStart())
+            ->setParameter('end', $period->getEnd())
             ->getQuery()
             ->execute()
         ;

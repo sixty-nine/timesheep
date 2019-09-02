@@ -8,6 +8,7 @@ use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Helper\DatePeriod;
 use SixtyNine\Timesheep\Helper\DateTime;
 use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
+use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
 use Symfony\Component\Console\Command\Command;
@@ -51,22 +52,15 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
         /** @var string $toStr */
         $toStr = $input->getOption('to');
         $to = $toStr ? new DateTimeImmutable($toStr) : null;
+        $period = new Period($from, $to);
 
         if ($input->getOption('week')) {
-            $p = DatePeriod::getWeek(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
-            /** @var ?DateTimeImmutable $from */
-            $from = $p->start;
-            /** @var ?DateTimeImmutable $to */
-            $to = $p->end;
+            $period = Period::getWeek(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
         } elseif ($input->getOption('month')) {
-            $p = DatePeriod::getMonth(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
-            /** @var ?DateTimeImmutable $from */
-            $from = $p->start;
-            /** @var ?DateTimeImmutable $to */
-            $to = $p->end;
+            $period = Period::getMonth(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
         }
 
-        $entries = $repo->getAllEntries($from, $to);
+        $entries = $repo->getAllEntries($period);
 
         $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
         $duration = 0;
@@ -81,7 +75,7 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
             return [
                 $date,
                 $entry->getStart()->format('H:i'),
-                $entry->getEnd()->format('H:i'),
+                null !== $entry->getEnd() ? $entry->getEnd()->format('H:i') : '-',
                 str_pad($entry->getDuration(), $padding, ' ', STR_PAD_LEFT),
                 $entry->getProject(),
                 $entry->getTask(),

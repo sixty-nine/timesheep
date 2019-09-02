@@ -5,6 +5,7 @@ namespace SixtyNine\Timesheep\Console\Command;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
+use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
 use Symfony\Component\Console\Command\Command;
@@ -61,6 +62,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
         $diffs = $this->calculateDiffs($start, $end);
         $startDate = DateTimeImmutable::createFromMutable($diffs['start']);
         $endDate = DateTimeImmutable::createFromMutable($diffs['end']);
+        $period = new Period($startDate, $endDate);
 
         $io->writeln([
             sprintf('Start: <info>%s</info>', $diffs['start-formatted']),
@@ -71,7 +73,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
             sprintf('Task: <info>%s</info>', $task),
         ]);
 
-        $crossingEntries = $repo->findCrossingEntries($startDate, $endDate);
+        $crossingEntries = $repo->findCrossingEntries($period);
         if (0 < count($crossingEntries)) {
             /** @var Entry $firstEntry */
             $firstEntry = $crossingEntries[0];
@@ -81,7 +83,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
                     'id=%s, %s-%s %s %s',
                     $firstEntry->getId(),
                     $firstEntry->getStart()->format('H:i'),
-                    $firstEntry->getEnd()->format('H:i'),
+                    null !== $firstEntry->getEnd() ? $firstEntry->getEnd()->format('H:i') : '-',
                     $firstEntry->getProject(),
                     $firstEntry->getTask()
                 )
@@ -94,7 +96,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
             return 1;
         }
 
-        $repo->create($startDate, $endDate, $project ?? '', $task ?? '');
+        $repo->create($period, $project ?? '', $task ?? '');
         $io->writeln('Entry created');
     }
 

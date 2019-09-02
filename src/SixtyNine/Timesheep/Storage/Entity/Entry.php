@@ -26,7 +26,7 @@ class Entry
     protected $start;
 
     /**
-     * @var DateTimeImmutable
+     * @var ?DateTimeImmutable
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     protected $end;
@@ -77,18 +77,18 @@ class Entry
     }
 
     /**
-     * @return DateTimeImmutable
+     * @return DateTimeImmutable|null
      */
-    public function getEnd(): DateTimeImmutable
+    public function getEnd(): ?DateTimeImmutable
     {
         return $this->end;
     }
 
     /**
-     * @param DateTimeImmutable $end
+     * @param DateTimeImmutable|null $end
      * @return Entry
      */
-    public function setEnd(DateTimeImmutable $end): Entry
+    public function setEnd(?DateTimeImmutable $end): Entry
     {
         $this->end = $end;
         return $this;
