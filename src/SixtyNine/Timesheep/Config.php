@@ -21,4 +21,12 @@ class Config
     {
         return Arrays::getValueDotted($this->config, $key) ?? '';
     }
+
+    public function toArray(): array
+    {
+        return [
+            'db' => ['url' => $this->get('db.url')],
+            'console' => ['box-style' => $this->get('console.box-style')],
+        ];
+    }
 }

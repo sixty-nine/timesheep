@@ -37,13 +37,20 @@ class Bootstrap
      */
     public static function boostrap(LoggerInterface $logger = null): ContainerBuilder
     {
-        if (file_exists(self::$baseDir.'/.env')) {
-            $dotenv = Dotenv::create(self::$baseDir);
+        $setup = new \SixtyNine\Timesheep\Setup();
+        $setup->check();
+
+        $envFile = \Phar::running(false) ?: self::$baseDir.'/.env';
+        $envDir = realpath(dirname($envFile)) ?: '.';
+
+        if (file_exists($envFile)) {
+            $dotenv = Dotenv::create($envDir, basename($envFile) ?: '.env');
             $dotenv->load();
         }
 
         self::$config = new Config();
         self::$logger = $logger;
+
         $container = self::getContainer();
         $container->register('config', Config::class);
         $container
@@ -108,7 +115,7 @@ class Bootstrap
         );
         $connection = DriverManager::getConnection(
             [
-            'url' => self::$config->get('db.url'),
+                'url' => self::$config->get('db.url'),
             ],
             $config
         );
