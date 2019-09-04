@@ -14,6 +14,7 @@ class Config
     public function __construct()
     {
         Arrays::setValueDotted($this->config, 'db.url', getenv('TIMESHEEP_DB_URL'));
+        Arrays::setValueDotted($this->config, 'console.box-style', getenv('BOX_STYLE') ?: 'default');
     }
 
     public function get(string $key): string

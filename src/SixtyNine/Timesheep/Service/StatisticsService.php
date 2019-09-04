@@ -55,7 +55,6 @@ SQL;
         $res = $stmt->fetchAll();
 
         $stats = new ProjectStatistics();
-        $stats->setTotal($this->getTotalDuration($period));
 
         foreach ($res as $item) {
             $stats->addProjectHours($item['project'], $item['total']);

@@ -4,11 +4,10 @@ namespace SixtyNine\Timesheep\Console\Command;
 
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
+use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
-use SixtyNine\Timesheep\Helper\DatePeriod;
-use SixtyNine\Timesheep\Helper\DateTime;
-use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
+use SixtyNine\Timesheep\Service\StatisticsService;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
 use Symfony\Component\Console\Command\Command;
@@ -45,55 +44,68 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
         $em = $this->container->get('em');
         /** @var EntryRepository $repo */
         $repo = $em->getRepository(Entry::class);
+        /** @var Config $config */
+        $config = $this->container->get('config');
+
+        $statsService = new StatisticsService($em);
 
         /** @var string $fromStr */
         $fromStr = $input->getOption('from');
-        $from = $fromStr ? new DateTimeImmutable($fromStr) : null;
         /** @var string $toStr */
         $toStr = $input->getOption('to');
-        $to = $toStr ? new DateTimeImmutable($toStr) : null;
-        $period = new Period($from, $to);
+        $period = new Period(
+            $fromStr ? new DateTimeImmutable($fromStr) : null,
+            $toStr ? new DateTimeImmutable($toStr) : null
+        );
 
         if ($input->getOption('week')) {
-            $period = Period::getWeek(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
+            $period = Period::getWeek($period->getFirstDateOrToday());
         } elseif ($input->getOption('month')) {
-            $period = Period::getMonth(DateTimeHelper::getfirstNotNullOrToday([$from, $to]));
+            $period = Period::getMonth($period->getFirstDateOrToday());
         }
 
         $entries = $repo->getAllEntries($period);
+        $stats = $statsService->getProjectStats($period);
 
         $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
-        $duration = 0;
         $padding = strlen(' Duration ') - 2;
+
+        $io->writeln([
+            sprintf('From: <info>%s</info>', $period->getStartFormatted('Y-m-d')),
+            sprintf('To: <info>%s</info>', $period->getEndFormatted('Y-m-d')),
+            '',
+        ]);
+
+        $io->table(
+            $headers,
+            $this->prepareEntries($entries, $padding),
+            $config->get('console.box-style')
+        );
+
+        $io->writeln([
+            sprintf('Total: <info>%sh</info>', $stats->getTotalString()),
+            sprintf('Decimal: <info>%sh</info>', $stats->getTotal()),
+            '',
+        ]);
+    }
+
+    protected function prepareEntries(array $entries, int $padding = 0): array
+    {
         $lastDate = null;
 
-        $rows = array_map(static function (Entry $entry) use (&$duration, &$lastDate, $padding) {
-            $duration += $entry->getDecimalDuration();
-            $entryDate = $entry->getStart()->format('Y-m-d');
+        return array_map(static function (Entry $entry) use (&$lastDate, $padding) {
+            $entryDate = $entry->getStartFormatted('Y-m-d');
             $date = $lastDate !== $entryDate ? $entryDate : '';
             $lastDate = $entryDate;
             return [
                 $date,
                 $entry->getStart()->format('H:i'),
-                null !== $entry->getEnd() ? $entry->getEnd()->format('H:i') : '-',
-                str_pad($entry->getDuration(), $padding, ' ', STR_PAD_LEFT),
+                $entry->getEndFormatted('H:i'),
+                str_pad($entry->getPeriod()->getDurationString(), $padding, ' ', STR_PAD_LEFT),
                 $entry->getProject(),
                 $entry->getTask(),
                 $entry->getDescription(),
             ];
         }, $entries);
-
-        $io->writeln([
-            sprintf('From: <info>%s</info>', $from ? $from->format('Y-m-d') : '-'),
-            sprintf('To: <info>%s</info>', $to ? $to->format('Y-m-d') : '-'),
-            '',
-        ]);
-        $io->table($headers, $rows, 'box');
-
-        $io->writeln([
-            sprintf('Total: <info>%sh</info>', DateTimeHelper::decimalToTime($duration)),
-            sprintf('Decimal: <info>%sh</info>', $duration),
-            '',
-        ]);
     }
 }

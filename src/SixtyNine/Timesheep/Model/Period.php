@@ -45,12 +45,12 @@ class Period
         return new self($from, $to);
     }
 
-    public static function fromSTring(string $start, string $end): Period
+    public static function fromString(?string $start, ?string $end): Period
     {
         /** @var int $startTs */
-        $startTs = strtotime($start);
+        $startTs = strtotime($start ?? '');
         /** @var int $endTs */
-        $endTs = strtotime($end);
+        $endTs = strtotime($end ?? '');
 
         Assert::true(false !== $startTs, 'Invalid start time');
         Assert::true(false !== $endTs, 'Invalid end time');
@@ -137,5 +137,16 @@ class Period
 
         $diff = $this->end->diff($this->start);
         return $diff->h + round($diff->i / 60, 2);
+    }
+
+    public function getFirstDateOrToday(): DateTimeImmutable
+    {
+        if ($this->start) {
+            return $this->start;
+        }
+        if ($this->end) {
+            return $this->end;
+        }
+        return new DateTimeImmutable();
     }
 }

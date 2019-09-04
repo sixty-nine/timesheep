@@ -3,19 +3,21 @@
 namespace SixtyNine\Timesheep\Model;
 
 use Webmozart\Assert\Assert;
+use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 
 class ProjectStatistics
 {
     /** @var array */
     private $hoursPerProject = [];
-    /** @var int */
+    /** @var float */
     private $total = 0;
 
 
     /**
-     * @return int
+     * @param string $name
+     * @return float
      */
-    public function getProjectHours(string $name): int
+    public function getProjectHours(string $name): float
     {
         if (!array_key_exists($name, $this->hoursPerProject)) {
             return 0;
@@ -24,32 +26,28 @@ class ProjectStatistics
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getTotal(): int
+    public function getTotal(): float
     {
         return $this->total;
     }
 
-    /**
-     * @param int $total
-     * @return ProjectStatistics
-     */
-    public function setTotal(int $total): ProjectStatistics
+    public function getTotalString(): string
     {
-        $this->total = $total;
-        return $this;
+        return DateTimeHelper::decimalToTime($this->total);
     }
 
     /**
      * @param string $name
-     * @param int $hours
+     * @param float $hours
      */
-    public function addProjectHours(string $name, int $hours): void
+    public function addProjectHours(string $name, float $hours): void
     {
         if (!array_key_exists($name, $this->hoursPerProject)) {
             $this->hoursPerProject[$name] = 0;
         }
+        $this->total += $hours;
         $this->hoursPerProject[$name] += $hours;
     }
 }

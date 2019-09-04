@@ -4,6 +4,7 @@ namespace SixtyNine\Timesheep\Storage\Entity;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use SixtyNine\Timesheep\Model\Period;
 
 /**
  * @ORM\Entity(repositoryClass="SixtyNine\Timesheep\Storage\Repository\EntryRepository")
@@ -67,6 +68,15 @@ class Entry
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getStartFormatted(string $format): string
+    {
+        return $this->start->format($format);
+    }
+
+    /**
      * @param DateTimeImmutable $start
      * @return Entry
      */
@@ -82,6 +92,15 @@ class Entry
     public function getEnd(): ?DateTimeImmutable
     {
         return $this->end;
+    }
+
+    /**
+     * @param string $format
+     * @return string
+     */
+    public function getEndFormatted(string $format): string
+    {
+        return $this->end ? $this->end->format($format) : '-';
     }
 
     /**
@@ -148,33 +167,19 @@ class Entry
         return $this;
     }
 
-    /**
-     * Get the duration in hours
-     * @return string
-     */
-    public function getDuration(): string
+    public function getPeriod(): Period
     {
-        if (null === $this->end || null === $this->start) {
-            return '00:00';
-        }
-
-        return $this
-            ->end
-            ->diff($this->start, true)
-            ->format('%H:%I');
+        return new Period($this->start, $this->end);
     }
 
-    /**
-     * Get the decimal duration.
-     * @return float
-     */
-    public function getDecimalDuration(): float
+    public function __toString()
     {
-        if (null === $this->end || null === $this->start) {
-            return 0;
-        }
-
-        $diff = $this->end->diff($this->start, true);
-        return $diff->h + round($diff->i / 60, 2);
+        return sprintf(
+            '%s-%s %s %s',
+            $this->getStartFormatted('H:i'),
+            $this->getEndFormatted('H:i'),
+            $this->getProject(),
+            $this->getTask()
+        );
     }
 }
