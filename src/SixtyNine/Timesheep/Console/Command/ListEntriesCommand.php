@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Model\Period;
+use SixtyNine\Timesheep\Model\ProjectStatistics;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
@@ -33,6 +34,7 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
             ->addOption('week', null, InputOption::VALUE_NONE, 'This week')
             ->addOption('month', null, InputOption::VALUE_NONE, 'This week')
             ->addOption('day', null, InputOption::VALUE_NONE, 'This day')
+            ->addoption('stats', null, InputOption::VALUE_NONE, 'Display the project stats')
         ;
     }
 
@@ -76,11 +78,15 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
             '',
         ]);
 
-        $io->table(
-            $headers,
-            $this->prepareEntries($entries, $padding),
-            $config->get('console.box-style')
-        );
+        if (!$input->getOption('stats')) {
+            $io->table(
+                $headers,
+                $this->prepareEntries($entries, $padding),
+                $config->get('console.box-style')
+            );
+        } else {
+            $this->displayStats($io, $stats, $config);
+        }
 
         $io->writeln([
             sprintf('Total: <info>%sh</info>', $stats->getTotalString()),
@@ -107,5 +113,18 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
                 $entry->getDescription(),
             ];
         }, $entries);
+    }
+
+    protected function displayStats(MyStyle $io, ProjectStatistics $stats, Config $config)
+    {
+        $rows = [];
+        foreach ($stats->getProjectsHours() as $project => $hours) {
+            $rows[] = [$project, sprintf('%sh', $hours)];
+        }
+        $io->table(
+            ['Project', 'Duration'],
+            $rows,
+            $config->get('console.box-style')
+        );
     }
 }

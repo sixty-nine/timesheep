@@ -26,6 +26,14 @@ class ProjectStatistics
     }
 
     /**
+     * @return array
+     */
+    public function getProjectsHours(): array
+    {
+        return $this->hoursPerProject;
+    }
+
+    /**
      * @return float
      */
     public function getTotal(): float
