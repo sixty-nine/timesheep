@@ -73,9 +73,7 @@ class Bootstrap
      */
     public static function getConfig(): Config
     {
-        /**
- * @var Config $config
-*/
+        /** @var Config $config */
         $config = self::getContainer()->get('config');
         return $config;
     }
@@ -120,6 +118,6 @@ class Bootstrap
 
     private static function registerServices(ContainerBuilder $container): void
     {
-        $config = $container->get('config');
+        $container->get('config');
     }
 }

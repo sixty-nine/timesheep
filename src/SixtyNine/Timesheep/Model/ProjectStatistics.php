@@ -2,7 +2,6 @@
 
 namespace SixtyNine\Timesheep\Model;
 
-use Webmozart\Assert\Assert;
 use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 
 class ProjectStatistics
