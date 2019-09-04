@@ -3,6 +3,7 @@
 namespace SixtyNine\Timesheep\Model;
 
 use DateTimeImmutable;
+use Webmozart\Assert\Assert;
 
 class Period
 {
@@ -44,12 +45,41 @@ class Period
         return new self($from, $to);
     }
 
+    public static function fromSTring(string $start, string $end): Period
+    {
+        /** @var int $startTs */
+        $startTs = strtotime($start);
+        /** @var int $endTs */
+        $endTs = strtotime($end);
+
+        Assert::true(false !== $startTs, 'Invalid start time');
+        Assert::true(false !== $endTs, 'Invalid end time');
+
+        $startDate = (new DateTimeImmutable())->setTimestamp($startTs);
+        $endDate = (new DateTimeImmutable())->setTimestamp($endTs);
+
+        if ($endDate < $startDate) {
+            $endDate = $endDate->modify('+1 day');
+        }
+
+        return new self($startDate, $endDate);
+    }
+
     /**
      * @return DateTimeImmutable|null
      */
     public function getStart(): ?DateTimeImmutable
     {
         return $this->start;
+    }
+
+    /**
+     * @param string $format
+     * @return string
+     */
+    public function getStartFormatted(string $format): string
+    {
+        return $this->start ? $this->start->format($format) : '-';
     }
 
     /**
@@ -71,6 +101,15 @@ class Period
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getEndFormatted(string $format): string
+    {
+        return $this->end ? $this->end->format($format) : '-';
+    }
+
+    /**
      * @param DateTimeImmutable $end
      * @return Period
      */
@@ -78,5 +117,25 @@ class Period
     {
         $this->end = $end;
         return $this;
+    }
+
+    public function getDurationString(): string
+    {
+        if (!$this->end || !$this->start) {
+            return '-';
+        }
+
+        $diff = $this->end->diff($this->start);
+        return $diff->format('%H:%I');
+    }
+
+    public function getDuration(): float
+    {
+        if (!$this->end || !$this->start) {
+            return 0;
+        }
+
+        $diff = $this->end->diff($this->start);
+        return $diff->h + round($diff->i / 60, 2);
     }
 }

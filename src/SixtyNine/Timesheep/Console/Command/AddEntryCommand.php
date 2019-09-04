@@ -54,21 +54,13 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
         $io = new SymfonyStyle($input, $output);
         $io->title('Add a new entry');
 
-        if (!$startEnd = $this->inputTime($input, $io)) {
-            return 1;
-        }
-
-        [$start, $end] = $startEnd;
-        $diffs = $this->calculateDiffs($start, $end);
-        $startDate = DateTimeImmutable::createFromMutable($diffs['start']);
-        $endDate = DateTimeImmutable::createFromMutable($diffs['end']);
-        $period = new Period($startDate, $endDate);
+        $period = $this->inputTime($input, $io);
 
         $io->writeln([
-            sprintf('Start: <info>%s</info>', $diffs['start-formatted']),
-            sprintf('End: <info>%s</info>', $diffs['end-formatted']),
-            sprintf('Duration: <info>%s</info>', $diffs['duration']),
-            sprintf('Decimal: <info>%s</info>', $diffs['duration-decimal']),
+            sprintf('Start: <info>%s</info>', $period->getStartFormatted('Y-m-d H:i:s')),
+            sprintf('End: <info>%s</info>', $period->getEndFormatted('Y-m-d H:i:s')),
+            sprintf('Duration: <info>%s</info>', $period->getDurationString()),
+            sprintf('Decimal: <info>%s</info>', $period->getDuration()),
             sprintf('Project: <info>%s</info>', $project),
             sprintf('Task: <info>%s</info>', $task),
         ]);
@@ -100,7 +92,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
         $io->writeln('Entry created');
     }
 
-    protected function inputTime(InputInterface $input, SymfonyStyle $io)
+    protected function inputTime(InputInterface $input, SymfonyStyle $io): Period
     {
         $start = $input->getArgument('start');
         $end = $input->getArgument('end');
@@ -112,46 +104,6 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
             $end = $io->ask('End time');
         }
 
-        $start = strtotime($start);
-        $end = strtotime($end);
-
-        if (!$start) {
-            $io->error('Invalid start time');
-            return false;
-        }
-
-        if (!$end) {
-            $io->error('Invalid end time');
-            return false;
-        }
-
-        return [$start, $end];
-    }
-
-    public function dateTimeFromTs(int $timestamp): DateTime
-    {
-        return (new DateTime())->setTimestamp($timestamp);
-    }
-
-    public function calculateDiffs(int $timestamp1, int $timestamp2)
-    {
-        $startDate = $this->dateTimeFromTs($timestamp1);
-        $endDate = $this->dateTimeFromTs($timestamp2);
-
-        if ($endDate < $startDate) {
-            $endDate->modify('+1 day');
-        }
-
-        $diff = $endDate->diff($startDate);
-
-        return [
-            'start' => $startDate,
-            'end' => $endDate,
-            'diff' => $diff,
-            'start-formatted' => $startDate->format('Y-m-d H:i:s'),
-            'end-formatted' => $endDate->format('Y-m-d H:i:s'),
-            'duration' => $diff->format('%H:%I'),
-            'duration-decimal' => $diff->h + round($diff->i / 60, 2),
-        ];
+        return Period::fromSTring($start, $end);
     }
 }
