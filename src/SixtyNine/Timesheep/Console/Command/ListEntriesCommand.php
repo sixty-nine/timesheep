@@ -64,6 +64,9 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
             $period = Period::getWeek($period->getFirstDateOrToday());
         } elseif ($input->getOption('month')) {
             $period = Period::getMonth($period->getFirstDateOrToday());
+        } elseif ($input->getOption('day')) {
+            $day = $period->getFirstDateOrToday();
+            $period = new Period($day, $day);
         }
 
         $entries = $repo->getAllEntries($period);
