@@ -9,6 +9,6 @@ default:
         tags: '~@functional'
     functional_features:
       paths:    [ ./features ]
-      contexts: [ DbFeatureContext ]
+      contexts: [ FeatureContext ]
       filters:
         tags: '@functional'

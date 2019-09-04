@@ -1,244 +1,142 @@
 <?php
 
-require_once __DIR__.'/../../vendor/autoload.php';
-
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\Behat\Hook\Scope\BeforeStepScope;
+use Behat\Behat\Tester\Exception\PendingException;
+use Doctrine\ORM\EntityManager;
+use Psr\Container\ContainerInterface;
 use SixtyNine\Timesheep\Bootstrap;
-use SixtyNine\Timesheep\Domain\Model\Entry;
-use SixtyNine\Timesheep\Domain\Model\Project;
-use SixtyNine\Timesheep\Domain\Model\Timesheet;
-use SixtyNine\Timesheep\Domain\Model\User;
+use SixtyNine\Timesheep\Helper\Doctrine as DoctrineHelper;
+use SixtyNine\Timesheep\Model\Period;
+use SixtyNine\Timesheep\Model\ProjectStatistics;
+use SixtyNine\Timesheep\Service\StatisticsService;
+use SixtyNine\Timesheep\Storage\Entity\Entry;
+use SixtyNine\Timesheep\Storage\Entity\Project;
+use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
+use SixtyNine\Timesheep\Storage\Repository\ProjectRepository;
 use Webmozart\Assert\Assert;
 
-use function DeepCopy\deep_copy;
-
-/**
- * Defines application features from the specific context.
- */
 class FeatureContext implements Context
 {
-    use CastingHoursToIntTrait;
     use CastingDateTrait;
     use CastingTimeToDateTrait;
+    use CastingTimesToPeriodTrait;
+    use RunningCommandsTrait;
 
-    /** @var User */
-    private $user;
-    /** @var Project[] */
-    private $projects = [];
-    /** @var Timesheet */
-    private $timesheet;
-    /** @var Timesheet */
-    private $prevTs;
+    /** @var EntityManager */
+    private $em;
+    /** @var EntryRepository $entryRepo */
+    private $entryRepo;
+    /** @var ProjectRepository $projRepo */
+    private $projRepo;
+    /** @var ContainerInterface */
+    private $container;
+    /** @var ProjectStatistics */
+    private $stats;
 
-    /**
-     * FeatureContext constructor.
-     */
     public function __construct()
     {
-        Bootstrap::boostrap();
+        $this->container = Bootstrap::boostrap();
+        $this->em = $this->container->get('em');
+        $this->entryRepo = $this->em->getRepository(Entry::class);
+        $this->projRepo = $this->em->getRepository(Project::class);
     }
 
-    /** @BeforeStep */
-    public function prepare(BeforeStepScope $scope): void
+    /**
+     * @Given /^I have an empty database$/
+     * @Given /^my timesheet is empty$/
+     */
+    public function iHaveAnEmptyDatabase()
     {
-        if ('the current entry should be unchanged' !== $scope->getStep()->getText()) {
-            $this->prevTs = deep_copy($this->timesheet);
+        DoctrineHelper::truncateAll($this->em->getConnection());
+    }
+
+    /**
+     * @Given /^I have an entry (.*)$/
+     * @Given /^I should be able to create an entry (.*)$/
+     */
+    public function iHaveAnEntryFromTo(Period $period)
+    {
+        $entry = $this->entryRepo->create($period);
+    }
+
+    /**
+     * @Then /^I should not be able to create an entry (.*)$/
+     */
+    public function iShouldNotBeAbleToCreateAnEntryFromTo(Period $period)
+    {
+        try {
+            $thrown = false;
+            $this->entryRepo->create($period);
+        } catch (\Exception $ex) {
+            $thrown = true;
         }
+
+        Assert::true($thrown, 'The entry could be created');
     }
 
     /**
-     * @Transform /^"([^"]+)" project$/
-     * @Transform /^project "([^"]+)"$/
-     * @Transform :customer
+     * @Then /^I should have an?(?: new)? entry (from .* to [^ ]*)$/
+     * @Then /^I should have an?(?: new)? entry (from .* to [^ ]* on [^ ])$/
+     * @Then /^I should have an?(?: new)? entry (from .* to [^ ]* on [^ ]) in project (.*)$/
+     * @Then /^I should have an?(?: new)? entry (.*) in project (.*)$/
      */
-    public function castNameToProject(string $name): ?Project
+    public function iShouldHaveANewEntryFromTo(Period $period, string $project = null)
     {
-        if (!array_key_exists($name, $this->projects)) {
-            throw new \Exception('Project not found: '.$name);
+        $entry = $this->entryRepo->findEntry($period, $project);
+        Assert::notNull($entry, 'Entry not found');
+    }
+
+    /**
+     * @Given /^I should have (\d+) entr(?:y|ies)$/
+     */
+    public function iShouldHaveEntries(int $number)
+    {
+        Assert::count($this->entryRepo->findAll(), $number);
+    }
+
+    /**
+     * @Then /^I should have a project (.*)$/
+     */
+    public function iShouldHaveAProjectPROJ(string $project)
+    {
+        Assert::true($this->projRepo->exists($project));
+    }
+
+    /**
+     * @Given /^I should have (?:only )?(\d+) projects?$/
+     */
+    public function iShouldHaveProject($count)
+    {
+        Assert::eq($count, $this->projRepo->count([]));
+    }
+
+    /**
+     * @When /^I request the stats(?: for (.*))?$/
+     */
+    public function iRequestTheStats(string $date = null)
+    {
+        $period = new Period();
+        if ($date) {
+            $period->setStart(new DateTimeImmutable($date));
+            $period->setEnd(new DateTimeImmutable($date));
         }
-        return $this->projects[$name];
+        $service = new StatisticsService($this->em);
+        $this->stats = $service->getProjectStats($period);
     }
 
     /**
-     * @Transform /^(\d?\d:\d\d)$/
+     * @Then /^I should have (\d+) hours? in (.*)/
      */
-    public function castTimeToCurDate(string $time): DateTimeImmutable
+    public function iShouldHaveHoursInProject($hours, $project)
     {
-        return $this->castTimeToDate($time, $this->timesheet->getCurDate());
+        Assert::eq($hours, $this->stats->getProjectHours($project));
     }
 
     /**
-     * @Given I am a timesheep user
+     * @Given /^the total should be (\d+) hours?$/
      */
-    public function iAmATimesheepUser(): void
+    public function theTotalShouldBeHours($hours)
     {
-        $this->user = new User('timesheep');
+        Assert::eq($hours, $this->stats->getTotal());
     }
-
-    /**
-     * @Given /my weekly due time is (-?\d+h)/
-     */
-    public function myWeeklyDueTimeIs($hours): void
-    {
-        $this->user->setWeeklyDueHours((int)$hours);
-    }
-
-    /**
-     * @Given /I have a project named "([^"]*)"/
-     * @param string $name
-     */
-    public function iHaveAProjectNamed(string $name): void
-    {
-        if (!array_key_exists($name, $this->projects)) {
-            $this->projects[$name] = new Project($name);
-        }
-    }
-
-    /**
-     * @Given my timesheet is empty
-     */
-    public function myTimesheetIsEmpty(): void
-    {
-        $this->timesheet = new Timesheet();
-    }
-
-    /**
-     * @Given /^today is (.*)$/
-     */
-    public function todayIs(DateTimeImmutable $date)
-    {
-        $this->timesheet->setCurDate($date);
-    }
-
-    /**
-     * @When /I check-in to the (project "[^"]+") at (.*)/
-     */
-    public function iCheckInToTheProjectAt2(Project $project, DateTimeImmutable $startTime): void
-    {
-        $this->timesheet->checkInAt($project, $startTime);
-    }
-
-    /**
-     * @Then I should have a current entry in my timesheet
-     */
-    public function iShouldHaveACurrentEntry(): void
-    {
-        Assert::notNull($this->timesheet->getCurEntry(), 'There is no current entry');
-    }
-
-    /**
-     * @Then /the current entry start time should be (.*)/
-     */
-    public function theCurrentEntryStartTimeShouldBe(DateTimeImmutable $time): void
-    {
-        $this->iShouldHaveACurrentEntry();
-        $this->assertDateEq($this->timesheet->getCurEntry()->getStart(), $time);
-    }
-    /**
-     * @Then /the current entry should be in (project "[^"]+")/
-     */
-    public function theCurrentEntryShouldBeInProject(Project $project): void
-    {
-        Assert::eq($this->timesheet->getCurEntry()->getProject(), $project);
-    }
-
-    /**
-     * @Then the current entry should not have an end time
-     */
-    public function theCurrentEntryShouldNotHaveAnEndTime(): void
-    {
-        Assert::null($this->timesheet->getCurEntry()->getEnd());
-    }
-
-    /**
-     * @Then /my weekly due time should be (\d+h)/
-     */
-    public function myWeeklyDueTimeShouldBe(int $hours): void
-    {
-        $due = $this->user->getWeeklyDueHours() - $this->timesheet->getWorkedTime();
-        Assert::eq($hours, $due);
-    }
-
-    /**
-     * @When /I check-out from the (project "[^"]+") at (.*)/
-     */
-    public function iCheckoutFromTheProjectAt(Project $project, DateTimeImmutable $endTime): void
-    {
-        $this->iShouldHaveACurrentEntry();
-        Assert::eq($project, $this->timesheet->getCurEntry()->getProject());
-        $this->timesheet->getCurEntry()->setEnd($endTime);
-    }
-
-    /**
-     * @Then the current entry should be unchanged
-     */
-    public function theCurrentEntryShouldBeUnchanged(): void
-    {
-        Assert::eq($this->prevTs, $this->timesheet);
-    }
-
-    /**
-     * @Then /the current entry end time should be (tomorrow at )?(.*)/
-     */
-    public function theCurrentEntryEndTimeShouldBe($tomorrow, DateTimeImmutable $time): void
-    {
-        $this->iShouldHaveACurrentEntry();
-        if ($tomorrow) {
-            $time = $time->modify('+1 day');
-        }
-        $this->assertDateEq($this->timesheet->getCurEntry()->getEnd(), $time);
-    }
-
-    /**
-     * @Then /the current entry duration should be (-?\d+h)/
-     */
-    public function theCurrentEntryDurationShouldBe(int $hours): void
-    {
-        $this->iShouldHaveACurrentEntry();
-        Assert::eq($hours, $this->timesheet->getCurEntry()->getDuration());
-    }
-
-    /**
-     * @When /I add an entry to (project "[^"]+") from (.*) to (.*)/
-     */
-    public function iAddAnEntryToProjectFromTo(
-        Project $project,
-        DateTimeImmutable $startTime,
-        DateTimeImmutable $endTime
-    ): void {
-        while ($endTime < $startTime) {
-            $endTime = $endTime->modify('+1 day');
-        }
-        $this->timesheet->addEntry(
-            new Entry($project, $startTime, $endTime)
-        );
-    }
-
-    protected function assertDateEq(DateTimeImmutable $date1, DateTimeImmutable $date2, string $format = null)
-    {
-        if ($format) {
-            Assert::eq(
-                $date1->format($format),
-                $date2->format($format),
-                sprintf('Expected %s got %s', $date2->format('r'), $date1->format('r'))
-            );
-        } else {
-            Assert::eq(
-                $date1,
-                $date2,
-                sprintf('Expected %s got %s', $date2->format('r'), $date1->format('r'))
-            );
-        }
-    }
-
-    /**
-     * @Given /^the current entry date should be (.*)$/
-     */
-    public function theCurrentEntryDateShouldBe(DateTimeImmutable $date)
-    {
-        $this->assertDateEq($date, $this->timesheet->getCurEntry()->getStart(), 'Y-m-d');
-    }
-
 }
