@@ -1,4 +1,4 @@
-@functional @current
+@functional
 Feature: Prevent wrong entries
 
     As a user
@@ -6,7 +6,7 @@ Feature: Prevent wrong entries
     So that my timesheet remains consistent
 
     Scenario: Create entry
-        Given I my timesheet is empty
+        Given my timesheet is empty
          When I call the "add" command with:
             | start   | 10:00  |
             | end     | 11:00  |

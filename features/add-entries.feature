@@ -6,7 +6,7 @@ Feature: Using entry:add
     In order to track the time I spend on projects
 
     Scenario: Create entry for today
-        Given I my timesheet is empty
+        Given my timesheet is empty
          When I call the "add" command with {"start": "10:00", "end": "11:00", "--force": "true"}
          Then the command should succeed
           And I should have an entry from 10:00 to 11:00

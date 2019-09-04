@@ -30,7 +30,7 @@
     "scripts": {
         "check:all": "/bin/sh build/check-all.sh",
         "check:stan": "vendor/bin/phpstan analyse src -c .phpstan.neon --level max",
-        "check:lint": "vendor/bin/phpcs --standard=PSR2 src",
+        "check:lint": "vendor/bin/phpcs src --standard=PSR2",
         "check:lint:fix": "vendor/bin/phpcbf --standard=PSR2 src",
         "test": "vendor/bin/phpunit -c tests --colors=always",
         "test:unit": "vendor/bin/phpunit -c tests --testsuite Unit --colors=always",

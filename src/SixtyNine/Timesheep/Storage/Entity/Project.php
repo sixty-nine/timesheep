@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Project
 {
     /**
-     * @var                        int
+     * @var int
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
@@ -19,10 +19,16 @@ class Project
     protected $id;
 
     /**
-     * @var                       string
+     * @var string
      * @ORM\Column(type="string", unique=true)
      */
     protected $name;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $description;
 
     /**
      * Project constructor.
@@ -51,7 +57,7 @@ class Project
     }
 
     /**
-     * @param  string $name
+     * @param string $name
      * @return Project
      */
     public function setName(string $name): Project

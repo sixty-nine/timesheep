@@ -6,66 +6,18 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
+use SixtyNine\Timesheep\Storage\Entity\Project;
 use Webmozart\Assert\Assert;
 
 class EntryRepository extends EntityRepository
 {
-    public function getDuration(Period $period)
-    {
-        $sql = <<<SQL
-select
-    cast(
-        round(sum(julianday(end) - julianday(start)) * 24, 2) as FLOAT
-    ) as duration
-    from entries
-SQL;
-
-        $where = [];
-        $params = [];
-
-        if ($start = $period->getStart()) {
-            $where[] = "start >= '%s'";
-            $params[] = $start->format('Y-m-d h:i:s');
-        }
-        if ($end = $period->getEnd()) {
-            $where[] = "end >= '%s'";
-            $params[] = $end->format('Y-m-d h:i:s');
-        }
-        if ($where) {
-            $sql .= ' where '.implode(' AND ', $where);
-        }
-        $sql = sprintf($sql, ...$params);
-        $stmt = $this->_em->getConnection()->prepare($sql);
-        $stmt->execute();
-        $res = $stmt->fetchAll();
-        $res = reset($res);
-        return (float)$res['duration'];
-    }
-
     /**
-     * @param Period $period
+     * @param Period|null $period
      * @return mixed
      */
-    public function getAllEntries(Period $period)
+    public function getAllEntries(Period $period = null)
     {
-        $qb = $this
-            ->createQueryBuilder('e')
-            ->orderBy('e.start')
-        ;
-        /** @var DateTimeImmutable $start */
-        if ($start = $period->getStart()) {
-            $qb
-                ->andWhere('e.start >= :from')
-                ->setParameter('from', $start->setTime(0, 0))
-            ;
-        }
-        /** @var DateTimeImmutable $end */
-        if ($end = $period->getEnd()) {
-            $qb
-                ->andWhere('e.end <= :to')
-                ->setParameter('to', $end->setTime(23, 59, 59)->modify('+1 second'))
-            ;
-        }
+        $qb = $this->getBaseQueryBuilder($period);
         return $qb->getQuery()->execute();
     }
 
@@ -84,6 +36,14 @@ SQL;
         $start = $period->getStart();
         Assert::notNull($start, 'An entry must have a start date');
 
+        if ($project) {
+            /** @var ProjectRepository $projRepo */
+            $projRepo = $this->_em->getRepository(Project::class);
+            if (!$projRepo->exists($project)) {
+                $projRepo->create($project);
+            }
+        }
+
         $entry = new Entry();
         $entry
             ->setStart($start)
@@ -98,13 +58,23 @@ SQL;
         return $entry;
     }
 
-    public function findEntry(Period $period)
+    public function findEntry(Period $period, string $project = null)
     {
-        return $this
+        $qb = $this
             ->createQueryBuilder('e')
-            ->orWhere('e.start = :start AND e.end = :end')
+            ->andWhere('e.start = :start AND e.end = :end')
             ->setParameter('start', $period->getStart())
             ->setParameter('end', $period->getEnd())
+        ;
+
+        if ($project) {
+            $qb
+                ->andWhere('e.project = :project')
+                ->setParameter('project', $project)
+            ;
+        }
+
+        return $qb
             ->getQuery()
             ->getOneOrNullResult()
         ;
@@ -124,5 +94,32 @@ SQL;
             ->getQuery()
             ->execute()
         ;
+    }
+
+    protected function getBaseQueryBuilder(Period $period = null)
+    {
+        $qb = $this
+            ->createQueryBuilder('e')
+            ->orderBy('e.start')
+        ;
+
+        if ($period) {
+            /** @var DateTimeImmutable $start */
+            if ($start = $period->getStart()) {
+                $qb
+                    ->andWhere('e.start >= :from')
+                    ->setParameter('from', $start->setTime(0, 0))
+                ;
+            }
+            /** @var DateTimeImmutable $end */
+            if ($end = $period->getEnd()) {
+                $qb
+                    ->andWhere('e.end <= :to')
+                    ->setParameter('to', $end->setTime(23, 59, 59)->modify('+1 second'))
+                ;
+            }
+        }
+
+        return $qb;
     }
 }
