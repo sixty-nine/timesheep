@@ -32,19 +32,20 @@ class Bootstrap
     private static $logger;
 
     /**
-     * @param  LoggerInterface|null $logger
+     * @param LoggerInterface|null $logger
+     * @param string $envFilename
      * @return ContainerBuilder
      */
-    public static function boostrap(LoggerInterface $logger = null): ContainerBuilder
+    public static function boostrap(LoggerInterface $logger = null, $envFilename = '.env'): ContainerBuilder
     {
         $setup = new \SixtyNine\Timesheep\Setup();
         $setup->check();
 
-        $envFile = \Phar::running(false) ?: self::$baseDir.'/.env';
+        $envFile = \Phar::running(false) ?: self::$baseDir.$envFilename;
         $envDir = realpath(dirname($envFile)) ?: '.';
 
         if (file_exists($envFile)) {
-            $dotenv = Dotenv::create($envDir, basename($envFile) ?: '.env');
+            $dotenv = Dotenv::create($envDir, basename($envFile) ?: $envFilename);
             $dotenv->load();
         }
 

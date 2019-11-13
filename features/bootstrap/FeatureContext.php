@@ -35,7 +35,7 @@ class FeatureContext implements Context
 
     public function __construct()
     {
-        $this->container = Bootstrap::boostrap();
+        $this->container = Bootstrap::boostrap(null, '.env.test');
         $this->em = $this->container->get('em');
         $this->entryRepo = $this->em->getRepository(Entry::class);
         $this->projRepo = $this->em->getRepository(Project::class);
