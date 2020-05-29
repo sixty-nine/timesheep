@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
+use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
 use SixtyNine\Timesheep\Service\StatisticsService;
@@ -122,10 +123,10 @@ class ListEntriesCommand extends Command implements ContainerAwareInterface
     {
         $rows = [];
         foreach ($stats->getProjectsHours() as $project => $hours) {
-            $rows[] = [$project, sprintf('%sh', $hours)];
+            $rows[] = [$project, sprintf('%sh', $hours), DateTimeHelper::decimalToTime($hours)];
         }
         $io->table(
-            ['Project', 'Duration'],
+            ['Project', 'Duration', ''],
             $rows,
             $config->get('console.box-style')
         );
