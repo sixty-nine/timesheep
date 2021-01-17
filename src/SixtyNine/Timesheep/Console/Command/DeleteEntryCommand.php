@@ -2,17 +2,12 @@
 
 namespace SixtyNine\Timesheep\Console\Command;
 
-use Doctrine\ORM\EntityManager;
-use SixtyNine\Timesheep\Storage\Entity\Project;
-use SixtyNine\Timesheep\Storage\Repository\ProjectRepository;
-use Symfony\Component\Console\Command\Command;
+use SixtyNine\Timesheep\Console\TimesheepCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class DeleteEntryCommand extends Command implements ContainerAwareInterface
+class DeleteEntryCommand extends TimesheepCommand
 {
     use ContainerAwareTrait;
 

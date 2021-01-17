@@ -2,24 +2,18 @@
 
 namespace SixtyNine\Timesheep\Console\Command;
 
-use DateTime;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
-use SixtyNine\Timesheep\Model\Period;
+use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
-use SixtyNine\Timesheep\Storage\Entity\Project;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class AddEntryCommand extends Command implements ContainerAwareInterface
+class AddEntryCommand extends TimesheepCommand
 {
     use ContainerAwareTrait;
 
@@ -83,7 +77,7 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
             sprintf('Description: <info>%s</info>', $description),
         ]);
 
-        if ($entry = $this->checkNoCrossingEntries($repo, $period)) {
+        if ($entry = $repo->checkNoCrossingEntries($period)) {
             $io->error(['There is another entry crossing this one', $entry]);
             return 1;
         }
@@ -95,70 +89,5 @@ class AddEntryCommand extends Command implements ContainerAwareInterface
 
         $repo->create($period, $project ?? '', $task ?? '', $description ?? '');
         $io->writeln('Entry created');
-    }
-
-    protected function inputTime(InputInterface $input, SymfonyStyle $io): Period
-    {
-        $force = $input->getOption('force');
-        $start = $input->getArgument('start');
-        $end = $input->getArgument('end');
-
-        if (!$force && !$start) {
-            $start = $io->ask('Start time');
-        }
-        if (!$force && !$end) {
-            $end = $io->ask('End time');
-        }
-
-        return Period::fromString($start, $end);
-    }
-
-    protected function inputProject(
-        InputInterface $input,
-        OutputInterface $output,
-        EntityManager $em
-    ): string {
-        $projRepo = $em->getRepository(Project::class);
-        $helper = $this->getHelper('question');
-
-        $question = new Question(" <info>Project name:</info>\n >", '');
-        $projects = $projRepo->findAll();
-        $question->setAutocompleterCallback(
-            static function (string $userInput) use ($projects): array {
-                $list = $projects;
-                $filter = static function ($project) use ($userInput) {
-                    return strpos($project['name'], $userInput) === 0;
-                };
-                $map = static function ($project) {
-                    return $project['name'];
-                };
-
-                if ($userInput) {
-                    $list = array_filter($projects, $filter);
-                }
-
-                return array_values(array_map($map, $list));
-            }
-        );
-
-        $res = $helper->ask($input, $output, $question);
-        $output->writeln('');
-        return $res;
-    }
-
-    /**
-     * @param EntryRepository $repo
-     * @param Period $period
-     * @return bool|Entry
-     */
-    protected function checkNoCrossingEntries(EntryRepository $repo, Period $period)
-    {
-        $crossingEntries = $repo->findCrossingEntries($period);
-        if (0 < count($crossingEntries)) {
-            /** @var Entry $firstEntry */
-            return $crossingEntries[0];
-        }
-
-        return false;
     }
 }

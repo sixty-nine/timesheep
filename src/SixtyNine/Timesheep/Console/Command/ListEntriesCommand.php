@@ -6,20 +6,19 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
+use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class ListEntriesCommand extends Command implements ContainerAwareInterface
+class ListEntriesCommand extends TimesheepCommand
 {
     use ContainerAwareTrait;
 

@@ -5,15 +5,14 @@ namespace SixtyNine\Timesheep\Console\Command;
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
+use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Storage\Entity\Project;
 use SixtyNine\Timesheep\Storage\Repository\ProjectRepository;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class ListProjectsCommand extends Command implements ContainerAwareInterface
+class ListProjectsCommand extends TimesheepCommand
 {
     use ContainerAwareTrait;
 

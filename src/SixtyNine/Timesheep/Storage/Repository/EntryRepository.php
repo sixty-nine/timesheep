@@ -122,4 +122,19 @@ class EntryRepository extends EntityRepository
 
         return $qb;
     }
+
+    /**
+     * @param Period $period
+     * @return bool|Entry
+     */
+    public function checkNoCrossingEntries(Period $period)
+    {
+        $crossingEntries = $this->findCrossingEntries($period);
+        if (0 < count($crossingEntries)) {
+            /** @var Entry $firstEntry */
+            return $crossingEntries[0];
+        }
+
+        return false;
+    }
 }
