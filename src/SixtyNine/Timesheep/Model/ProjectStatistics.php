@@ -2,6 +2,8 @@
 
 namespace SixtyNine\Timesheep\Model;
 
+use SixtyNine\Timesheep\Helper\DateTimeHelper;
+
 class ProjectStatistics
 {
     /** @var array */
@@ -36,6 +38,20 @@ class ProjectStatistics
     public function getTotal(): float
     {
         return $this->total;
+    }
+
+    public function getDataTable(DateTimeHelper $dtHelper): DataTable
+    {
+        $table = new DataTable(['Project', 'Duration', '']);
+
+        foreach ($this->hoursPerProject as $project => $hours) {
+            $table->addRow([
+                $project,
+                sprintf('%sh', $hours), $dtHelper->decimalToTime($hours)
+            ]);
+        }
+
+        return $table;
     }
 
     /**
