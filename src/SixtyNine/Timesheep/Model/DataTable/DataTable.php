@@ -1,13 +1,10 @@
 <?php
 
+namespace SixtyNine\Timesheep\Model\DataTable;
 
-namespace SixtyNine\Timesheep\Model;
-
-
-use Symfony\Component\Console\Helper\TableSeparator;
 use Webmozart\Assert\Assert;
 
-class DataTable
+class DataTable implements DataTableInterface
 {
     /** @var array[string] */
     private $headers;
@@ -44,12 +41,5 @@ class DataTable
     public function getRows(): array
     {
         return $this->rows;
-    }
-
-    public function getRowsWithTableSeparators(): array
-    {
-        return array_map(static function ($row) {
-            return empty($row) ? new TableSeparator() : $row;
-        }, $this->rows);
     }
 }

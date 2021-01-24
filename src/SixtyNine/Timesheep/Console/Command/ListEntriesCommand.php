@@ -8,10 +8,11 @@ use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Helper\DateTimeHelper;
-use SixtyNine\Timesheep\Model\DataTable;
+use SixtyNine\Timesheep\Model\DataTable\Builder\EntriesDataTableBuilder;
+use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
+use SixtyNine\Timesheep\Model\DataTable\Builder\StatsDataTableBuilder;
+use SixtyNine\Timesheep\Model\DataTable\SymfonyConsoleDataTable;
 use SixtyNine\Timesheep\Model\Period;
-use SixtyNine\Timesheep\Model\ProjectStatistics;
-use SixtyNine\Timesheep\Model\TimeBlocks;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
@@ -56,6 +57,8 @@ class ListEntriesCommand extends TimesheepCommand
 
         $statsService = new StatisticsService($em);
 
+        // --- Process parameters
+
         $displayStats = $input->getOption('stats');
         $displayPresence = $input->getOption('presence');
 
@@ -63,7 +66,7 @@ class ListEntriesCommand extends TimesheepCommand
             throw new \InvalidArgumentException(
                 'The --stats and --presence switches cannot be used together'
             );
-        };
+        }
 
         /** @var string $fromStr */
         $fromStr = $input->getOption('from');
@@ -83,8 +86,22 @@ class ListEntriesCommand extends TimesheepCommand
             $period = new Period($day, $day);
         }
 
+        // --- Gather data
+
         $entries = $repo->getAllEntries($period);
         $stats = $statsService->getProjectStats($period);
+
+        if ($displayStats) {
+            $table = StatsDataTableBuilder::build($stats, $dtHelper);
+        } elseif ($displayPresence) {
+            $table = SymfonyConsoleDataTable::fromDataTable(
+                PresenceDataTableBuilder::build($entries)
+            );
+        } else {
+            $table = EntriesDataTableBuilder::build($entries);
+        }
+
+        // --- Output results
 
         $io->writeln([
             sprintf('From: <info>%s</info>', $period->getStartFormatted('Y-m-d')),
@@ -92,13 +109,11 @@ class ListEntriesCommand extends TimesheepCommand
             '',
         ]);
 
-        if ($displayStats) {
-            $this->displayStats($io, $stats, $config, $dtHelper);
-        } elseif ($displayPresence) {
-            $this->displayPresence($io, $entries, $config, $dtHelper);
-        } else {
-            $this->displayEntries($io, $entries, $config);
-        }
+        $io->table(
+            $table->getHeaders(),
+            $table->getRows(),
+            $config->get('console.box-style')
+        );
 
         $total = $stats->getTotal();
         $io->writeln([
@@ -106,101 +121,5 @@ class ListEntriesCommand extends TimesheepCommand
             sprintf('Decimal: <info>%sh</info>', $total),
             '',
         ]);
-    }
-
-    protected function displayEntries(MyStyle $io, $entries, Config $config): void
-    {
-        $table = $this->buildEntriesTable($entries);
-        $io->table(
-            $table->getHeaders(),
-            $table->getRows(),
-            $config->get('console.box-style')
-        );
-    }
-
-    protected function displayPresence(MyStyle $io, array $entries, Config $config, DateTimeHelper $dtHelper): void
-    {
-        $table = $this->buildPresenceTable($entries);
-        $io->table(
-            $table->getHeaders(),
-            $table->getRowsWithTableSeparators(),
-            $config->get('console.box-style')
-        );
-    }
-
-    protected function displayStats(
-        MyStyle $io,
-        ProjectStatistics $stats,
-        Config $config,
-        DateTimeHelper $dtHelper
-    ): void {
-        $table = $stats->getDataTable($dtHelper);
-        $io->table(
-            $table->getHeaders(),
-            $table->getRows(),
-            $config->get('console.box-style')
-        );
-    }
-
-    protected function buildEntriesTable($entries): DataTable
-    {
-        $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
-        $table = new DataTable($headers);
-        $padding = strlen(' Duration ') - 2;
-        $lastDate = null;
-
-        /** @var Entry $entry */
-        foreach ($entries as $entry) {
-            $entryDate = $entry->getStartFormatted('Y-m-d');
-            $date = $lastDate !== $entryDate ? $entryDate : '';
-            $lastDate = $entryDate;
-
-            $table->addRow([
-                $date,
-                $entry->getStart()->format('H:i'),
-                $entry->getEndFormatted('H:i'),
-                str_pad($entry->getPeriod()->getDurationString(), $padding, ' ', STR_PAD_LEFT),
-                $entry->getProject(),
-                $entry->getTask(),
-                $entry->getDescription(),
-            ]);
-        }
-
-        return $table;
-    }
-
-    protected function buildPresenceTable(array $entries): DataTable
-    {
-        $blocks = new TimeBlocks();
-        /** @var Entry $entry */
-        foreach ($entries as $entry) {
-            $blocks->addPeriod($entry->getPeriod());
-        }
-
-        $headers = ['Date', 'Start', 'End', 'Duration', 'Decimal'];
-        $table = new DataTable($headers);
-        $lastDate = null;
-
-        /** @var Period $p */
-        foreach ($blocks->getPeriods() as $p) {
-            $date = $p->getStartFormatted('Y-m-d');
-
-            if ($lastDate !== $date) {
-                if ($lastDate) {
-                    $table->addSeparator();
-                }
-                $lastDate = $date;
-            }
-
-            $table->addRow([
-                $p->getStartFormatted('Y-m-d'),
-                (null !== $p->getStart()) ? $p->getStart()->format('H:i') : '-',
-                (null !== $p->getEnd()) ? $p->getEnd()->format('H:i') : '-',
-                $p->getDurationString(),
-                $p->getDuration().'h',
-            ]);
-        }
-
-        return $table;
     }
 }
