@@ -86,9 +86,6 @@ class ListEntriesCommand extends TimesheepCommand
         $entries = $repo->getAllEntries($period);
         $stats = $statsService->getProjectStats($period);
 
-        $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
-        $padding = strlen(' Duration ') - 2;
-
         $io->writeln([
             sprintf('From: <info>%s</info>', $period->getStartFormatted('Y-m-d')),
             sprintf('To: <info>%s</info>', $period->getEndFormatted('Y-m-d')),
@@ -100,11 +97,7 @@ class ListEntriesCommand extends TimesheepCommand
         } elseif ($displayPresence) {
             $this->displayPresence($io, $entries, $config, $dtHelper);
         } else {
-            $io->table(
-                $headers,
-                $this->prepareEntries($entries, $padding),
-                $config->get('console.box-style')
-            );
+            $this->displayEntries($io, $entries, $config);
         }
 
         $total = $stats->getTotal();
@@ -115,28 +108,12 @@ class ListEntriesCommand extends TimesheepCommand
         ]);
     }
 
-    protected function prepareEntries(array $entries, int $padding = 0): array
-    {
-        $lastDate = null;
-
-        return array_map(static function (Entry $entry) use (&$lastDate, $padding) {
-            $entryDate = $entry->getStartFormatted('Y-m-d');
-            $date = $lastDate !== $entryDate ? $entryDate : '';
-            $lastDate = $entryDate;
-            return [
-                $date,
-                $entry->getStart()->format('H:i'),
-                $entry->getEndFormatted('H:i'),
-                str_pad($entry->getPeriod()->getDurationString(), $padding, ' ', STR_PAD_LEFT),
-                $entry->getProject(),
-                $entry->getTask(),
-                $entry->getDescription(),
-            ];
-        }, $entries);
-    }
-
-    protected function displayStats(MyStyle $io, ProjectStatistics $stats, Config $config, DateTimeHelper $dtHelper)
-    {
+    protected function displayStats(
+        MyStyle $io,
+        ProjectStatistics $stats,
+        Config $config,
+        DateTimeHelper $dtHelper
+    ): void {
         $rows = [];
         foreach ($stats->getProjectsHours() as $project => $hours) {
             $rows[] = [$project, sprintf('%sh', $hours), $dtHelper->decimalToTime($hours)];
@@ -150,37 +127,63 @@ class ListEntriesCommand extends TimesheepCommand
 
     protected function displayPresence(MyStyle $io, array $entries, Config $config, DateTimeHelper $dtHelper): void
     {
-        $blocks = new TimeBlocks();
-        /** @var Entry $entry */
-        foreach ($entries as $entry) {
-            $blocks->addPeriod($entry->getPeriod());
-        }
+        $headers = ['Date', 'Start', 'End', 'Duration'];
 
-        $lastDate = null;
-        $arr = [];
-        /** @var Period $p */
-        foreach ($blocks->getPeriods() as $p) {
-            $date = $p->getStartFormatted('Y-m-d');
-            if ($lastDate !== $date) {
-                if ($lastDate) {
-                    $arr[] = new TableSeparator();
-                }
-                $lastDate = $date;
+        $list = (static function () use ($entries) {
+
+            $blocks = new TimeBlocks();
+            /** @var Entry $entry */
+            foreach ($entries as $entry) {
+                $blocks->addPeriod($entry->getPeriod());
             }
 
-            $arr[] = [
-                $p->getStartFormatted('Y-m-d'),
-                $p->getStart()->format('H:i'),
-                $p->getEnd()->format('H:i'),
-                $p->getDurationString(),
-                $p->getDuration().' h',
-            ];
-        }
+            $lastDate = null;
+            $arr = [];
+            /** @var Period $p */
+            foreach ($blocks->getPeriods() as $p) {
+                $date = $p->getStartFormatted('Y-m-d');
 
-        $io->table(
-            ['Date', 'Start', 'End', 'Duration'],
-            $arr,
-            $config->get('console.box-style')
-        );
+                if ($lastDate !== $date) {
+                    if ($lastDate) {
+                        $arr[] = new TableSeparator();
+                    }
+                    $lastDate = $date;
+                }
+
+                $arr[] = [
+                    $p->getStartFormatted('Y-m-d'),
+                    (null !== $p->getStart()) ? $p->getStart()->format('H:i') : '-',
+                    (null !== $p->getEnd()) ? $p->getEnd()->format('H:i') : '-',
+                    $p->getDurationString(),
+                    $p->getDuration().' h',
+                ];
+            }
+            return $arr;
+        })();
+
+        $io->table($headers, $list, $config->get('console.box-style'));
+    }
+
+    protected function displayEntries(MyStyle $io, $entries, Config $config): void
+    {
+        $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
+        $padding = strlen(' Duration ') - 2;
+        $lastDate = null;
+        $list = array_map(static function (Entry $entry) use (&$lastDate, $padding) {
+            $entryDate = $entry->getStartFormatted('Y-m-d');
+            $date = $lastDate !== $entryDate ? $entryDate : '';
+            $lastDate = $entryDate;
+            return [
+                $date,
+                $entry->getStart()->format('H:i'),
+                $entry->getEndFormatted('H:i'),
+                str_pad($entry->getPeriod()->getDurationString(), $padding, ' ', STR_PAD_LEFT),
+                $entry->getProject(),
+                $entry->getTask(),
+                $entry->getDescription(),
+            ];
+        }, $entries);
+
+        $io->table($headers, $list, $config->get('console.box-style'));
     }
 }
