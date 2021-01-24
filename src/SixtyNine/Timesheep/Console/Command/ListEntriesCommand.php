@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
-use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
+use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
 use SixtyNine\Timesheep\Service\StatisticsService;
@@ -46,6 +46,8 @@ class ListEntriesCommand extends TimesheepCommand
         $em = $this->container->get('em');
         /** @var EntryRepository $repo */
         $repo = $em->getRepository(Entry::class);
+        /** @var DateTimeHelper $dtHelper */
+        $dtHelper = $this->container->get('datetime-helper');
         /** @var Config $config */
         $config = $this->container->get('config');
 
@@ -88,12 +90,13 @@ class ListEntriesCommand extends TimesheepCommand
                 $config->get('console.box-style')
             );
         } else {
-            $this->displayStats($io, $stats, $config);
+            $this->displayStats($io, $stats, $config, $dtHelper);
         }
 
+        $total = $stats->getTotal();
         $io->writeln([
-            sprintf('Total: <info>%sh</info>', $stats->getTotalString()),
-            sprintf('Decimal: <info>%sh</info>', $stats->getTotal()),
+            sprintf('Total: <info>%sh</info>', $dtHelper->decimalToTime($total)),
+            sprintf('Decimal: <info>%sh</info>', $total),
             '',
         ]);
     }
@@ -118,11 +121,11 @@ class ListEntriesCommand extends TimesheepCommand
         }, $entries);
     }
 
-    protected function displayStats(MyStyle $io, ProjectStatistics $stats, Config $config)
+    protected function displayStats(MyStyle $io, ProjectStatistics $stats, Config $config, DateTimeHelper $dtHelper)
     {
         $rows = [];
         foreach ($stats->getProjectsHours() as $project => $hours) {
-            $rows[] = [$project, sprintf('%sh', $hours), DateTimeHelper::decimalToTime($hours)];
+            $rows[] = [$project, sprintf('%sh', $hours), $dtHelper->decimalToTime($hours)];
         }
         $io->table(
             ['Project', 'Duration', ''],

@@ -12,11 +12,18 @@ trait RunningCommandsTrait
     private $lastCommandOutput = '';
 
     /**
+     * @When /^I call the "([^"]*)" command$/
+     */
+    public function iCallTheCommand(string $name)
+    {
+        $this->callCommandWith($name);
+    }
+    /**
      * @When /^I call the "([^"]*)" command with (\{[^\}]*\})$/
      */
     public function iCallTheCommandWithJson(string $name, string $json)
     {
-        $commandTester = $this->callCommandWith($name, json_decode($json, true));
+        $this->callCommandWith($name, json_decode($json, true));
     }
 
     /**
@@ -24,7 +31,7 @@ trait RunningCommandsTrait
      */
     public function iCallTheCommandWith(string $name, TableNode $table)
     {
-        $commandTester = $this->callCommandWith($name, array_reduce($table->getRows(), static function ($prev, $item) {
+        $this->callCommandWith($name, array_reduce($table->getRows(), static function ($prev, $item) {
             return array_merge($prev, [$item[0] => $item[1]]);
         }, []));
     }
@@ -37,11 +44,19 @@ trait RunningCommandsTrait
         if ('succeed' === $status) {
             Assert::eq(0, $this->lastCommandStatus);
         } else {
-            Assert::true(0 < $this->lastCommandStatus);
+            Assert::true(0 !== $this->lastCommandStatus);
         }
     }
 
-    protected function callCommandWith(string $name, array $args): CommandTester
+    /**
+     * @Then /^show last command output$/
+     */
+    public function showLastCommandOutput()
+    {
+        echo $this->lastCommandOutput;
+    }
+
+    protected function callCommandWith(string $name, array $args = []): CommandTester
     {
         $app = new Application($this->container);
         $command = $app->find($name);

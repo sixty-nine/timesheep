@@ -10,6 +10,7 @@ use Doctrine\ORM\Tools\Setup;
 use Doctrine\DBAL\Driver\PDOSqlite\Driver;
 use Dotenv\Dotenv;
 use Psr\Log\LoggerInterface;
+use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class Bootstrap
@@ -47,6 +48,7 @@ class Bootstrap
         if (file_exists($envFile)) {
             $dotenv = Dotenv::create($envDir, basename($envFile) ?: $envFilename);
             $dotenv->load();
+            $dotenv->required(['TIMESHEEP_DB_URL']);
         }
 
         self::$config = new Config();
@@ -58,7 +60,7 @@ class Bootstrap
             ->register('em', EntityManager::class)
             ->setFactory([self::class, 'createEntityManager']);
 
-        self::registerServices($container);
+        $container->register('datetime-helper', DateTimeHelper::class);
 
         return $container;
     }
@@ -122,10 +124,5 @@ class Bootstrap
         );
         $connection->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
         return EntityManager::create($connection, $config);
-    }
-
-    private static function registerServices(ContainerBuilder $container): void
-    {
-        $container->get('config');
     }
 }

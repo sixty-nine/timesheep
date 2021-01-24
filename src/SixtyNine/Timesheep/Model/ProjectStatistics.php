@@ -2,8 +2,6 @@
 
 namespace SixtyNine\Timesheep\Model;
 
-use SixtyNine\Timesheep\Helper\DateTime as DateTimeHelper;
-
 class ProjectStatistics
 {
     /** @var array */
@@ -38,11 +36,6 @@ class ProjectStatistics
     public function getTotal(): float
     {
         return $this->total;
-    }
-
-    public function getTotalString(): string
-    {
-        return DateTimeHelper::decimalToTime($this->total);
     }
 
     /**

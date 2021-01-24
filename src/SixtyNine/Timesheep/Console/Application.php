@@ -37,6 +37,8 @@ class Application extends BaseApp
             new Command\AddEntryCommand(),
             new Command\EditEntryCommand(),
             new Command\DeleteEntryCommand(),
+            new Command\StartTaskCommand(),
+            new Command\EndTaskCommand(),
         ]);
     }
 
