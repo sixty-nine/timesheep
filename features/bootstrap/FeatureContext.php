@@ -1,10 +1,13 @@
 <?php
 
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpDocSignatureInspection */
+
 use Behat\Behat\Context\Context;
-use Behat\Behat\Tester\Exception\PendingException;
 use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
 use SixtyNine\Timesheep\Bootstrap;
+use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Helper\Doctrine as DoctrineHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
@@ -32,6 +35,8 @@ class FeatureContext implements Context
     private $container;
     /** @var ProjectStatistics */
     private $stats;
+    /** @var DateTimeHelper */
+    private $dtHelper;
 
     public function __construct()
     {
@@ -39,13 +44,14 @@ class FeatureContext implements Context
         $this->em = $this->container->get('em');
         $this->entryRepo = $this->em->getRepository(Entry::class);
         $this->projRepo = $this->em->getRepository(Project::class);
+        $this->dtHelper = $this->container->get('datetime-helper');
     }
 
     /**
      * @Given /^I have an empty database$/
      * @Given /^my timesheet is empty$/
      */
-    public function iHaveAnEmptyDatabase()
+    public function iHaveAnEmptyDatabase(): void
     {
         DoctrineHelper::truncateAll($this->em->getConnection());
     }
@@ -54,20 +60,20 @@ class FeatureContext implements Context
      * @Given /^I have an entry (.*)$/
      * @Given /^I should be able to create an entry (.*)$/
      */
-    public function iHaveAnEntryFromTo(Period $period)
+    public function iHaveAnEntryFromTo(Period $period): void
     {
-        $entry = $this->entryRepo->create($period);
+        $this->entryRepo->create($period);
     }
 
     /**
      * @Then /^I should not be able to create an entry (.*)$/
      */
-    public function iShouldNotBeAbleToCreateAnEntryFromTo(Period $period)
+    public function iShouldNotBeAbleToCreateAnEntryFromTo(Period $period): void
     {
         try {
             $thrown = false;
             $this->entryRepo->create($period);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $thrown = true;
         }
 
@@ -80,24 +86,65 @@ class FeatureContext implements Context
      * @Then /^I should have an?(?: new)? entry (from .* to [^ ]* on [^ ]) in project (.*)$/
      * @Then /^I should have an?(?: new)? entry (.*) in project (.*)$/
      */
-    public function iShouldHaveANewEntryFromTo(Period $period, string $project = null)
+    public function iShouldHaveANewEntryFromTo(Period $period, string $project = null): void
     {
         $entry = $this->entryRepo->findEntry($period, $project);
         Assert::notNull($entry, 'Entry not found');
     }
 
     /**
-     * @Given /^I should have (\d+) entr(?:y|ies)$/
+     * @Then /^I should have an?(?: new)? entry starting at (.*)$/
+     * @Then /^I should have an?(?: new)? entry starting at (.*) in project (.*)$/
      */
-    public function iShouldHaveEntries(int $number)
+    public function iShouldHaveAnEntryStartingAt(DateTimeImmutable $start, string $project = null): void
+    {
+        $rounding = getenv('TIME_ROUNDING');
+        $rounded = $this->dtHelper->roundTime($start, $rounding);
+        $entry = $this->entryRepo->findEntryStartingAt($rounded, $project);
+        Assert::notNull($entry, sprintf('No entry starting at %s found', $rounded->format(DateTimeInterface::ATOM)));
+    }
+
+    /**
+     * @Then /^I should have an?(?: new)? entry starting now$/
+     * @Then /^I should have an?(?: new)? entry starting now in project (.*)$/
+     */
+    public function iShouldHaveAnEntryStartingNow(string $project = null): void
+    {
+        $start = new DateTimeImmutable();
+        $rounding = getenv('TIME_ROUNDING');
+        $rounded = $this->dtHelper->roundTime($start, $rounding);
+        $entry = $this->entryRepo->findEntryStartingAt($rounded, $project);
+        Assert::notNull($entry, sprintf('No entry starting at %s found', $rounded->format(DateTimeInterface::ATOM)));
+    }
+
+    /**
+     * @Then /^I should have (\d+) entr(?:y|ies)$/
+     */
+    public function iShouldHaveEntries(int $number): void
     {
         Assert::count($this->entryRepo->findAll(), $number);
     }
 
     /**
+     * @Then /^I should have (\d+) entr(?:y|ies) with no ending time$/
+     */
+    public function iShouldHaveEntriesWithNoEndingTime(int $number): void
+    {
+        Assert::count($this->entryRepo->findEntriesWithNoEndingTime(), $number);
+    }
+
+    /**
+     * @Then /^I should have no entries with no ending time$/
+     */
+    public function iShouldHaveNoEntriesWithNoEndingTime(): void
+    {
+        $this->iShouldHaveEntriesWithNoEndingTime(0);
+    }
+
+    /**
      * @Then /^I should have a project (.*)$/
      */
-    public function iShouldHaveAProjectPROJ(string $project)
+    public function iShouldHaveAProjectPROJ(string $project): void
     {
         Assert::true($this->projRepo->exists($project));
     }
@@ -105,7 +152,7 @@ class FeatureContext implements Context
     /**
      * @Given /^I should have (?:only )?(\d+) projects?$/
      */
-    public function iShouldHaveProject($count)
+    public function iShouldHaveProject($count): void
     {
         Assert::eq($count, $this->projRepo->count([]));
     }
@@ -113,7 +160,7 @@ class FeatureContext implements Context
     /**
      * @When /^I request the stats(?: for (.*))?$/
      */
-    public function iRequestTheStats(string $date = null)
+    public function iRequestTheStats(string $date = null): void
     {
         $period = new Period();
         if ($date) {
@@ -127,7 +174,7 @@ class FeatureContext implements Context
     /**
      * @Then /^I should have (\d+) hours? in (.*)/
      */
-    public function iShouldHaveHoursInProject($hours, $project)
+    public function iShouldHaveHoursInProject($hours, $project): void
     {
         Assert::eq($hours, $this->stats->getProjectHours($project));
     }
@@ -135,7 +182,7 @@ class FeatureContext implements Context
     /**
      * @Given /^the total should be (\d+) hours?$/
      */
-    public function theTotalShouldBeHours($hours)
+    public function theTotalShouldBeHours($hours): void
     {
         Assert::eq($hours, $this->stats->getTotal());
     }

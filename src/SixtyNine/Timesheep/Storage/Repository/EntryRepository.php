@@ -80,6 +80,32 @@ class EntryRepository extends EntityRepository
         ;
     }
 
+    public function findEntryStartingAt(DateTimeImmutable $start, string $project = null)
+    {
+        $qb = $this
+            ->createQueryBuilder('e')
+            ->andWhere('e.start = :start')
+            ->setParameter('start', $start)
+        ;
+
+        if ($project) {
+            $qb
+                ->andWhere('e.project = :project')
+                ->setParameter('project', $project)
+            ;
+        }
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function findEntriesWithNoEndingTime(): array
+    {
+        return $this->findBy(['end' => null]);
+    }
+
     public function findCrossingEntries(Period $period)
     {
         return $this
