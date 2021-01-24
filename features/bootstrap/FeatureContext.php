@@ -24,6 +24,7 @@ class FeatureContext implements Context
     use CastingTimeToDateTrait;
     use CastingTimesToPeriodTrait;
     use RunningCommandsTrait;
+    use TimeBlocksTestingTrait;
 
     /** @var EntityManager */
     private $em;

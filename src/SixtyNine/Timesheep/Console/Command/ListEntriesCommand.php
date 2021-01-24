@@ -10,9 +10,11 @@ use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
+use SixtyNine\Timesheep\Model\TimeBlocks;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -35,6 +37,7 @@ class ListEntriesCommand extends TimesheepCommand
             ->addOption('month', null, InputOption::VALUE_NONE, 'This week')
             ->addOption('day', null, InputOption::VALUE_NONE, 'This day')
             ->addoption('stats', null, InputOption::VALUE_NONE, 'Display the project stats')
+            ->addoption('presence', null, InputOption::VALUE_NONE, 'Display presence time')
         ;
     }
 
@@ -52,6 +55,15 @@ class ListEntriesCommand extends TimesheepCommand
         $config = $this->container->get('config');
 
         $statsService = new StatisticsService($em);
+
+        $displayStats = $input->getOption('stats');
+        $displayPresence = $input->getOption('presence');
+
+        if ($displayStats && $displayPresence) {
+            throw new \InvalidArgumentException(
+                'The --stats and --presence switches cannot be used together'
+            );
+        };
 
         /** @var string $fromStr */
         $fromStr = $input->getOption('from');
@@ -83,14 +95,16 @@ class ListEntriesCommand extends TimesheepCommand
             '',
         ]);
 
-        if (!$input->getOption('stats')) {
+        if ($displayStats) {
+            $this->displayStats($io, $stats, $config, $dtHelper);
+        } elseif ($displayPresence) {
+            $this->displayPresence($io, $entries, $config, $dtHelper);
+        } else {
             $io->table(
                 $headers,
                 $this->prepareEntries($entries, $padding),
                 $config->get('console.box-style')
             );
-        } else {
-            $this->displayStats($io, $stats, $config, $dtHelper);
         }
 
         $total = $stats->getTotal();
@@ -130,6 +144,42 @@ class ListEntriesCommand extends TimesheepCommand
         $io->table(
             ['Project', 'Duration', ''],
             $rows,
+            $config->get('console.box-style')
+        );
+    }
+
+    protected function displayPresence(MyStyle $io, array $entries, Config $config, DateTimeHelper $dtHelper): void
+    {
+        $blocks = new TimeBlocks();
+        /** @var Entry $entry */
+        foreach ($entries as $entry) {
+            $blocks->addPeriod($entry->getPeriod());
+        }
+
+        $lastDate = null;
+        $arr = [];
+        /** @var Period $p */
+        foreach ($blocks->getPeriods() as $p) {
+            $date = $p->getStartFormatted('Y-m-d');
+            if ($lastDate !== $date) {
+                if ($lastDate) {
+                    $arr[] = new TableSeparator();
+                }
+                $lastDate = $date;
+            }
+
+            $arr[] = [
+                $p->getStartFormatted('Y-m-d'),
+                $p->getStart()->format('H:i'),
+                $p->getEnd()->format('H:i'),
+                $p->getDurationString(),
+                $p->getDuration().' h',
+            ];
+        }
+
+        $io->table(
+            ['Date', 'Start', 'End', 'Duration'],
+            $arr,
             $config->get('console.box-style')
         );
     }
