@@ -17,7 +17,7 @@ class Arrays
         return $count;
     }
 
-    public static function withouth(array $data, array $excludedKeys = []): array
+    public static function without(array $data, array $excludedKeys = []): array
     {
         $res = [];
         foreach ($data as $key => $value) {
