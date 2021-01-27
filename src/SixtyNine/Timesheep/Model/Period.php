@@ -129,4 +129,31 @@ class Period
         }
         return new DateTimeImmutable();
     }
+
+    public function overlaps(Period $period): bool
+    {
+        $startsInside = $period->getStart() >= $this->getStart()
+                     && $period->getStart() <= $this->getEnd();
+
+        $endsInside = $period->getEnd() >= $this->getStart()
+            && $period->getEnd() <= $this->getEnd();
+
+        return $startsInside || $endsInside;
+    }
+
+    public function merge(Period $period): Period
+    {
+        Assert::true($this->overlaps($period), 'Cannot merge non-overlapping periods');
+
+        return new Period(
+            $this->start <= $period->getStart() ? $this->start : $period->getStart(),
+            $this->end >= $period->getEnd() ? $this->end : $period->getEnd()
+        );
+
+    }
+
+    public function duplicate(): Period
+    {
+        return new Period($this->start, $this->end);
+    }
 }

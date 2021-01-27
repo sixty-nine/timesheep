@@ -1,11 +1,11 @@
 @unit
-Feature: Test TimeBlocks class
+Feature: Test NonOverlappingPeriodList class
 
     As a developer
-    I want to make sure TimeBlocks properly stores non contiguous block
+    I want to make sure NonOverlappingPeriodList properly stores non contiguous block
     So that it can be used to calculate presences
 
-    Scenario: Non-contigous periods
+    Scenario: Non-contiguous periods
         Given I have a time block list
         When I add the period from 10:00 to 11:00
         And I add the period from 12:00 to 13:00
