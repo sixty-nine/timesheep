@@ -165,8 +165,10 @@ class FeatureContext implements Context
     {
         $period = new Period();
         if ($date) {
-            $period->setStart(new DateTimeImmutable($date));
-            $period->setEnd(new DateTimeImmutable($date));
+            $period = new Period(
+                new DateTimeImmutable($date),
+                new DateTimeImmutable($date)
+            );
         }
         $service = new StatisticsService($this->em);
         $this->stats = $service->getProjectStats($period);

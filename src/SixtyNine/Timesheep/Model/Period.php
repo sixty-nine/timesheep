@@ -83,16 +83,6 @@ class Period
     }
 
     /**
-     * @param DateTimeImmutable $start
-     * @return Period
-     */
-    public function setStart(DateTimeImmutable $start): Period
-    {
-        $this->start = $start;
-        return $this;
-    }
-
-    /**
      * @return DateTimeImmutable|null
      */
     public function getEnd(): ?DateTimeImmutable
@@ -107,16 +97,6 @@ class Period
     public function getEndFormatted(string $format): string
     {
         return $this->end ? $this->end->format($format) : '-';
-    }
-
-    /**
-     * @param DateTimeImmutable $end
-     * @return Period
-     */
-    public function setEnd(DateTimeImmutable $end): Period
-    {
-        $this->end = $end;
-        return $this;
     }
 
     public function getDurationString(): string
