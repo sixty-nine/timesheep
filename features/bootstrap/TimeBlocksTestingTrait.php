@@ -13,7 +13,7 @@ trait TimeBlocksTestingTrait
     private $periodList = null;
 
     /**
-     * @Given /^I have a time block list$/
+     * @Given /^I have a list of non-contiguous periods$/
      */
     public function iHaveATimeBlockList(): void
     {
@@ -30,7 +30,7 @@ trait TimeBlocksTestingTrait
     }
 
     /**
-     * @Then /^the time block must contain (\d+) entr(?:y|ies)$/
+     * @Then /^the list of periods must contain (\d+) entr(?:y|ies)$/
      */
     public function theTimeBlockMustContainEntries(int $count): void
     {
