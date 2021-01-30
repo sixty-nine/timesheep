@@ -1,7 +1,5 @@
 # TimeSheep 🐑
 
-[![Build Status](https://travis-ci.org/sixty-nine/timesheep.svg?branch=master)](https://travis-ci.org/sixty-nine/timesheep)
-
 Simple timesheet manager.
 
 ## Install
