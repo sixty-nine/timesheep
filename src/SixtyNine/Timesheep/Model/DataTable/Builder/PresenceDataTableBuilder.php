@@ -9,13 +9,21 @@ use SixtyNine\Timesheep\Storage\Entity\Entry;
 
 class PresenceDataTableBuilder
 {
-    public static function build(array $entries, $splitPresence = false): DataTable
+    public static function build(array $entries, $splitLongerThan = 0, $splitDuration = 0.5): DataTable
     {
+        // Handle null params
+        $splitLongerThan = $splitLongerThan ?? 0;
+        $splitDuration = $splitDuration ?? 0.5;
+
         $periods = array_map(static function (Entry $entry) {
             return $entry->getPeriod();
         }, $entries);
 
         $blocks = new NonOverlappingPeriodList($periods);
+
+        if ($splitLongerThan > 0) {
+            $blocks = $blocks->splitPeriodsLongerThan($splitLongerThan, $splitDuration);
+        }
 
         $headers = ['Date', 'Start', 'End', 'Duration', 'Decimal'];
         $table = new DataTable($headers);

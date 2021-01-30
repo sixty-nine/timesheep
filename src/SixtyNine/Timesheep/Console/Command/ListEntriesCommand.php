@@ -37,8 +37,17 @@ class ListEntriesCommand extends TimesheepCommand
             ->addOption('week', null, InputOption::VALUE_NONE, 'This week')
             ->addOption('month', null, InputOption::VALUE_NONE, 'This week')
             ->addOption('day', null, InputOption::VALUE_NONE, 'This day')
-            ->addoption('stats', null, InputOption::VALUE_NONE, 'Display the project stats')
-            ->addoption('presence', null, InputOption::VALUE_NONE, 'Display presence time')
+            ->addOption('stats', null, InputOption::VALUE_NONE, 'Display the project stats')
+            // TODO: this become specialized and should go in another command.
+            ->addOption('presence', null, InputOption::VALUE_NONE, 'Display presence time')
+            ->addOption(
+                'split',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Split presence time longer than this value. Only works with --presence',
+                0
+            )
+            ->addOption('split-duration', null, InputOption::VALUE_OPTIONAL, 'Split duration', 0.5)
         ;
     }
 
@@ -61,6 +70,8 @@ class ListEntriesCommand extends TimesheepCommand
 
         $displayStats = $input->getOption('stats');
         $displayPresence = $input->getOption('presence');
+        $splitPresence = $input->getOption('split');
+        $splitDuration = $input->getOption('split-duration');
 
         if ($displayStats && $displayPresence) {
             throw new \InvalidArgumentException(
@@ -94,9 +105,8 @@ class ListEntriesCommand extends TimesheepCommand
         if ($displayStats) {
             $table = StatsDataTableBuilder::build($stats, $dtHelper);
         } elseif ($displayPresence) {
-            $table = SymfonyConsoleDataTable::fromDataTable(
-                PresenceDataTableBuilder::build($entries)
-            );
+            $table = PresenceDataTableBuilder::build($entries, $splitPresence, $splitDuration);
+            $table = SymfonyConsoleDataTable::fromDataTable($table);
         } else {
             $table = EntriesDataTableBuilder::build($entries);
         }
