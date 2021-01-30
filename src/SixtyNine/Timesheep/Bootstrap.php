@@ -39,8 +39,8 @@ class Bootstrap
      */
     public static function boostrap(LoggerInterface $logger = null, $envFilename = '.env'): ContainerBuilder
     {
-        $setup = new \SixtyNine\Timesheep\Setup();
-        $setup->check();
+//        $setup = new \SixtyNine\Timesheep\Setup();
+//        $setup->check();
 
         $envFile = \Phar::running(false) ?: self::$baseDir.$envFilename;
         $envDir = realpath(dirname($envFile)) ?: '.';

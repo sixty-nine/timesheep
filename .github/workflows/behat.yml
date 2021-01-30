@@ -1,0 +1,58 @@
+name: Run checks
+
+on:
+  push:
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        php: [7.2]
+        dependency-version: [prefer-stable]
+        os: [ubuntu-latest]
+
+    name: PHP ${{ matrix.php }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+#          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
+
+      - name: Create .env file
+        run: |
+          cp .env.example .env
+
+      - name: Create database file
+        run: |
+          mkdir database
+          touch database/database.db
+          vendor/bin/doctrine orm:schema-tool:create -q
+          mv database/database.db database/database.test.db
+
+      - name: Execute lint
+        run: |
+          vendor/bin/phpcs src --standard=PSR2
+
+      - name: Execute stan
+        run: |
+          vendor/bin/phpstan analyse src -c .phpstan.neon --level max
+
+      - name: Execute unit tests
+        run: |
+          vendor/bin/phpunit -c tests --testsuite Unit --colors=always
+
+      - name: Execute Behat
+        run: |
+          vendor/bin/behat --colors -vvv --stop-on-failure
