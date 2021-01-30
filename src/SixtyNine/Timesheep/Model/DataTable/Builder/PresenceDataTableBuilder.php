@@ -9,7 +9,7 @@ use SixtyNine\Timesheep\Storage\Entity\Entry;
 
 class PresenceDataTableBuilder
 {
-    public static function build(array $entries, $splitPresence = false): DataTable
+    public static function build(array $entries, $dateFormat = 'd-m-Y', $timeFormat = 'H:i'): DataTable
     {
         $periods = array_map(static function (Entry $entry) {
             return $entry->getPeriod();
@@ -23,9 +23,10 @@ class PresenceDataTableBuilder
 
         /** @var Period $p */
         foreach ($blocks->getPeriods() as $p) {
-            $date = $p->getStartFormatted('Y-m-d');
+            $date = $p->getStartFormatted($dateFormat);
 
-            if ($lastDate !== $date) {
+            $newRow = $lastDate !== $date;
+            if ($newRow) {
                 if ($lastDate) {
                     $table->addSeparator();
                 }
@@ -33,9 +34,9 @@ class PresenceDataTableBuilder
             }
 
             $table->addRow([
-                $p->getStartFormatted('Y-m-d'),
-                (null !== $p->getStart()) ? $p->getStart()->format('H:i') : '-',
-                (null !== $p->getEnd()) ? $p->getEnd()->format('H:i') : '-',
+                $newRow ? $p->getStartFormatted($dateFormat) : '',
+                (null !== $p->getStart()) ? $p->getStart()->format($timeFormat) : '-',
+                (null !== $p->getEnd()) ? $p->getEnd()->format($timeFormat) : '-',
                 $p->getDurationString(),
                 $p->getDuration() . 'h',
             ]);

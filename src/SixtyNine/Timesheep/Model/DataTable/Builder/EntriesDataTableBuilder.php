@@ -7,7 +7,7 @@ use SixtyNine\Timesheep\Storage\Entity\Entry;
 
 class EntriesDataTableBuilder
 {
-    public static function build(array $entries): DataTable
+    public static function build(array $entries, $dateFormat = 'd-m-Y', $timeFormat = 'H:i'): DataTable
     {
         $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];
         $table = new DataTable($headers);
@@ -16,14 +16,14 @@ class EntriesDataTableBuilder
 
         /** @var Entry $entry */
         foreach ($entries as $entry) {
-            $entryDate = $entry->getStartFormatted('Y-m-d');
+            $entryDate = $entry->getStartFormatted($dateFormat);
             $date = $lastDate !== $entryDate ? $entryDate : '';
             $lastDate = $entryDate;
 
             $table->addRow([
                 $date,
-                $entry->getStart()->format('H:i'),
-                $entry->getEndFormatted('H:i'),
+                $entry->getStart()->format($timeFormat),
+                $entry->getEndFormatted($timeFormat),
                 str_pad($entry->getPeriod()->getDurationString(), $padding, ' ', STR_PAD_LEFT),
                 $entry->getProject(),
                 $entry->getTask(),

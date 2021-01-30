@@ -57,19 +57,6 @@ class DateTimeHelper
     }
 
     /**
-     * @param DateTimeImmutable $date
-     * @param DateTimeImmutable $time
-     * @return DateTimeImmutable
-     * @throws Exception
-     */
-    public function getDateFromTime(DateTimeImmutable $date, DateTimeImmutable $time): DateTimeImmutable
-    {
-        return new DateTimeImmutable(
-            sprintf('%s %s:00', $date->format('Y-m-d'), $time->format('H:i'))
-        );
-    }
-
-    /**
      * @param float $decimal
      * @return string
      */

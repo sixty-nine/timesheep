@@ -3,6 +3,7 @@
 namespace SixtyNine\Timesheep\Console\Command;
 
 use Doctrine\ORM\EntityManager;
+use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
@@ -40,6 +41,10 @@ class AddEntryCommand extends TimesheepCommand
         $em = $this->container->get('em');
         /** @var EntryRepository $repo */
         $repo = $em->getRepository(Entry::class);
+        /** @var Config $config */
+        $config = $this->container->get('config');
+
+        $format = $config->get('format.datetime');
 
         /** @var string $force */
         $force = $input->getOption('force');
@@ -68,8 +73,8 @@ class AddEntryCommand extends TimesheepCommand
         }
 
         $io->writeln([
-            sprintf('Start: <info>%s</info>', $period->getStartFormatted('Y-m-d H:i:s')),
-            sprintf('End: <info>%s</info>', $period->getEndFormatted('Y-m-d H:i:s')),
+            sprintf('Start: <info>%s</info>', $period->getStartFormatted($format)),
+            sprintf('End: <info>%s</info>', $period->getEndFormatted($format)),
             sprintf('Duration: <info>%s</info>', $period->getDurationString()),
             sprintf('Decimal: <info>%s</info>', $period->getDuration()),
             sprintf('Project: <info>%s</info>', $project),

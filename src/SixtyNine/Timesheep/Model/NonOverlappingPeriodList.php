@@ -11,7 +11,7 @@ class NonOverlappingPeriodList
 
     /**
      * PeriodList constructor.
-     * @param array[Period] $periods
+     * @param array<Period> $periods
      */
     public function __construct(array $periods = [])
     {

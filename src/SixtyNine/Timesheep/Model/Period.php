@@ -149,7 +149,6 @@ class Period
             $this->start <= $period->getStart() ? $this->start : $period->getStart(),
             $this->end >= $period->getEnd() ? $this->end : $period->getEnd()
         );
-
     }
 
     public function duplicate(): Period

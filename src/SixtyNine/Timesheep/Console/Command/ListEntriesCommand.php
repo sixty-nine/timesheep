@@ -55,6 +55,9 @@ class ListEntriesCommand extends TimesheepCommand
         /** @var Config $config */
         $config = $this->container->get('config');
 
+        $dateFormat = $config->get('format.date');
+        $timeFormat = $config->get('format.time');
+
         $statsService = new StatisticsService($em);
 
         // --- Process parameters
@@ -95,17 +98,17 @@ class ListEntriesCommand extends TimesheepCommand
             $table = StatsDataTableBuilder::build($stats, $dtHelper);
         } elseif ($displayPresence) {
             $table = SymfonyConsoleDataTable::fromDataTable(
-                PresenceDataTableBuilder::build($entries)
+                PresenceDataTableBuilder::build($entries, $dateFormat, $timeFormat)
             );
         } else {
-            $table = EntriesDataTableBuilder::build($entries);
+            $table = EntriesDataTableBuilder::build($entries, $dateFormat, $timeFormat);
         }
 
         // --- Output results
 
         $io->writeln([
-            sprintf('From: <info>%s</info>', $period->getStartFormatted('Y-m-d')),
-            sprintf('To: <info>%s</info>', $period->getEndFormatted('Y-m-d')),
+            sprintf('From: <info>%s</info>', $period->getStartFormatted($dateFormat)),
+            sprintf('To: <info>%s</info>', $period->getEndFormatted($dateFormat)),
             '',
         ]);
 
