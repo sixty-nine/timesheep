@@ -57,7 +57,7 @@ The information shown in the results changes depending on the display switches:
 
 Replies to the question: what did I do that day?
 
-`bin/ts e:ls  --from "last friday"`
+`bin/ts e:ls  --from "last friday" --day`
 
 ```
 ┌────────────┬───────┬───────┬──────────┬───────────┬──────┬─────────────┐
@@ -76,7 +76,7 @@ Replies to the question: what did I do that day?
 
 Replies to the question: how much time did I spend on each project?
 
-`bin/ts e:ls  --from "last friday" --stats`
+`bin/ts e:ls  --from "last friday" --day --stats`
 
 ```
 From: 2021-01-22
@@ -99,7 +99,7 @@ Decimal: 6.25h
 
 Replies to the question: when was I working?
 
-`bin/ts e:ls  --from "last friday" --presence`
+`bin/ts e:ls  --from "last friday" --day --presence`
 
 ```
 Entries
@@ -120,3 +120,69 @@ To: -
 Total: 6:15h
 Decimal: 6.25h
 ```
+
+###### Splitting presence time
+
+Sometimes we want presence time to be split so that there are
+no periods longer than a given duration.
+
+This can be done with the `--split` option.
+
+You must provide a maximal duration as a float.
+
+The same presence report as above but with no periods longer
+than 4 hours:
+
+`bin/ts e:ls --from "last friday" --day --presence --split 4`
+
+```
+Entries
+=======
+
+From: 2021-01-22
+To: 2021-01-22
+
+┌────────────┬───────┬───────┬──────────┬─────────┐
+│ Date       │ Start │ End   │ Duration │ Decimal │
+├────────────┼───────┼───────┼──────────┼─────────┤
+│ 2021-01-22 │ 06:00 │ 08:00 │ 02:00    │ 2h      │
+│ 2021-01-22 │ 08:30 │ 11:15 │ 02:45    │ 2.75h   │
+│ 2021-01-22 │ 11:30 │ 11:45 │ 00:15    │ 0.25h   │
+│ 2021-01-22 │ 13:00 │ 13:45 │ 00:45    │ 0.75h   │
+│ 2021-01-22 │ 19:00 │ 19:30 │ 00:30    │ 0.5h    │
+└────────────┴───────┴───────┴──────────┴─────────┘
+
+Total: 6:15h
+Decimal: 6.25h
+```
+
+###### Split duration
+
+By default `--split` will insert breaks of 30 minutes.
+
+This can be changed with the `--split-duration` option
+(expecting a float).
+
+Same report as before but with 1 hours breaks.
+
+`bin/ts e:ls --from "last friday" --day --presence --split 4 --split-duration 1`
+
+```
+Entries
+=======
+
+From: 2021-01-22
+To: 2021-01-22
+
+┌────────────┬───────┬───────┬──────────┬─────────┐
+│ Date       │ Start │ End   │ Duration │ Decimal │
+├────────────┼───────┼───────┼──────────┼─────────┤
+│ 2021-01-22 │ 06:00 │ 08:00 │ 02:00    │ 2h      │
+│ 2021-01-22 │ 09:00 │ 11:45 │ 02:45    │ 2.75h   │
+│ 2021-01-22 │ 13:00 │ 13:45 │ 00:45    │ 0.75h   │
+│ 2021-01-22 │ 19:00 │ 19:30 │ 00:30    │ 0.5h    │
+└────────────┴───────┴───────┴──────────┴─────────┘
+
+Total: 6:15h
+Decimal: 6.25h
+``

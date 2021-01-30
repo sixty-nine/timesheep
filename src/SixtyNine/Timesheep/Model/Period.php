@@ -2,6 +2,7 @@
 
 namespace SixtyNine\Timesheep\Model;
 
+use DateInterval;
 use DateTimeImmutable;
 use Webmozart\Assert\Assert;
 
@@ -43,6 +44,16 @@ class Period
         $from = $dom !== 1 ? $date->modify('first day of this month') : $date;
         $to = $dom !== $nd ? $date->modify('last day of this month')->modify('-1 day') : $date;
         return new self($from, $to);
+    }
+
+    public static function fromDuration(DateTimeImmutable $start, float $duration): Period
+    {
+        // this will loose some seconds in the process
+        $hours = (int)$duration;
+        $mins = (int)(($duration - $hours) * 60);
+        $string = sprintf('%s hours %s minutes', $hours, $mins);
+        $end = $start->add(DateInterval::createFromDateString($string));
+        return new self($start, $end);
     }
 
     public static function fromString(?string $start, ?string $end): Period
@@ -130,6 +141,11 @@ class Period
         return new DateTimeImmutable();
     }
 
+    /**
+     * Two periods touching themselves are overlapping.
+     * @param Period $period
+     * @return bool
+     */
     public function overlaps(Period $period): bool
     {
         $startsInside = $period->getStart() >= $this->getStart()
@@ -137,6 +153,22 @@ class Period
 
         $endsInside = $period->getEnd() >= $this->getStart()
             && $period->getEnd() <= $this->getEnd();
+
+        return $startsInside || $endsInside;
+    }
+
+    /**
+     * Two periods touching themselves are NOT overlapping.
+     * @param Period $period
+     * @return bool
+     */
+    public function strictOverlaps(Period $period): bool
+    {
+        $startsInside = $period->getStart() > $this->getStart()
+                     && $period->getStart() < $this->getEnd();
+
+        $endsInside = $period->getEnd() > $this->getStart()
+            && $period->getEnd() < $this->getEnd();
 
         return $startsInside || $endsInside;
     }
@@ -150,6 +182,29 @@ class Period
             $this->end >= $period->getEnd() ? $this->end : $period->getEnd()
         );
 
+    }
+
+    public function split(float $splitDuration): NonOverlappingPeriodList
+    {
+        Assert::notNull($this->end, 'Cannot split empty periods');
+
+        $newDuration = $this->getDuration() / 2;
+        $durationFirst = (int)$newDuration;
+        $durationSecond = $this->getDuration() - $durationFirst;
+
+        $first = self::fromDuration($this->start, $durationFirst);
+
+        $endOfFirst = $first->getEnd();
+        Assert::notNull($endOfFirst, 'This should not happen');
+
+        $hours = (int)$splitDuration;
+        $mins = ($splitDuration - $hours) * 60;
+        $string = sprintf('%s hours %s minutes', $hours, $mins);
+        $startOfSecond = $endOfFirst->add(DateInterval::createFromDateString($string));
+
+        $second = self::fromDuration($startOfSecond, $durationSecond);
+
+        return new NonOverlappingPeriodList([$first, $second]);
     }
 
     public function duplicate(): Period
