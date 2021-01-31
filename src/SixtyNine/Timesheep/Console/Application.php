@@ -30,13 +30,16 @@ class Application extends BaseApp
         $this->logger->log(LogLevel::INFO, 'Timesheep application started');
 
         $this->addCommands([
-            new Command\ListProjectsCommand(),
-            new Command\AddProjectCommand(),
-            new Command\RemoveProjectCommand(),
-            new Command\ListEntriesCommand(),
-            new Command\AddEntryCommand(),
-            new Command\EditEntryCommand(),
-            new Command\DeleteEntryCommand(),
+            new Command\Project\ListProjectsCommand(),
+            new Command\Project\AddProjectCommand(),
+            new Command\Project\RemoveProjectCommand(),
+            new Command\Entry\ListEntriesCommand(),
+            new Command\Entry\AddEntryCommand(),
+            new Command\Entry\EditEntryCommand(),
+            new Command\Entry\DeleteEntryCommand(),
+            new Command\Database\ArchiveDbCommand(),
+            new Command\Database\BackupDbCommand(),
+            new Command\Database\DbInfoCommand(),
         ]);
     }
 

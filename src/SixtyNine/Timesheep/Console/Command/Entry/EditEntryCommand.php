@@ -1,23 +1,23 @@
 <?php
 
-namespace SixtyNine\Timesheep\Console\Command;
+namespace SixtyNine\Timesheep\Console\Command\Entry;
 
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class DeleteEntryCommand extends TimesheepCommand
+class EditEntryCommand extends TimesheepCommand
 {
     use ContainerAwareTrait;
 
-    protected static $defaultName = 'entry:delete';
+    protected static $defaultName = 'entry:edit';
 
     protected function configure()
     {
         $this
-            ->setDescription('Removes an entry.')
-            ->setAliases(['e:rm', 'rm']);
+            ->setDescription('Edit an entry.')
+            ->setAliases(['e:edit', 'edit']);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

@@ -1,6 +1,6 @@
 <?php
 
-namespace SixtyNine\Timesheep\Console\Command;
+namespace SixtyNine\Timesheep\Console\Command\Project;
 
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;

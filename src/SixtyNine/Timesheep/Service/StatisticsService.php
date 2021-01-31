@@ -2,19 +2,16 @@
 
 namespace SixtyNine\Timesheep\Service;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
 
 class StatisticsService
 {
-    /** @var EntityManager */
+    /** @var EntityManagerInterface */
     private $em;
 
-    /**
-     * StatisticsService constructor.
-     */
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
