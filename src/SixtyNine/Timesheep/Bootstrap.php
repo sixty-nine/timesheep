@@ -7,7 +7,6 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
-use Doctrine\DBAL\Driver\PDOSqlite\Driver;
 use Dotenv\Dotenv;
 use Psr\Log\LoggerInterface;
 use SixtyNine\Timesheep\Helper\DateTimeHelper;
@@ -26,7 +25,7 @@ class Bootstrap
     /**
      * @var string
      */
-    private static $baseDir = __DIR__.'/../../../';
+    private static $baseDir = __DIR__ . '/../../../';
     /**
      * @var LoggerInterface|null
      */
@@ -42,8 +41,15 @@ class Bootstrap
 //        $setup = new \SixtyNine\Timesheep\Setup();
 //        $setup->check();
 
-        $envFile = \Phar::running(false) ?: self::$baseDir.$envFilename;
-        $envDir = realpath(dirname($envFile)) ?: '.';
+        $phar = \Phar::running();
+
+        if ($phar) {
+            $envFile = $phar . '/' . $envFilename;
+            $envDir = $phar;
+        } else {
+            $envFile = self::$baseDir . $envFilename;
+            $envDir = realpath(dirname($envFile)) ?: '.';
+        }
 
         if (file_exists($envFile)) {
             $dotenv = Dotenv::create($envDir, basename($envFile) ?: $envFilename);
@@ -95,9 +101,9 @@ class Bootstrap
     public static function getEntityManager(): EntityManager
     {
         /**
- * @var EntityManager $em
-*/
-        $em =self::getContainer()->get('em');
+         * @var EntityManager $em
+         */
+        $em = self::getContainer()->get('em');
         return $em;
     }
 
@@ -108,7 +114,7 @@ class Bootstrap
      */
     public static function createEntityManager(): EntityManager
     {
-        $paths = [__DIR__.'/Storage/Entity'];
+        $paths = [__DIR__ . '/Storage/Entity'];
         $config = Setup::createAnnotationMetadataConfiguration(
             $paths,
             (bool)self::$config->get('dev-mode'),

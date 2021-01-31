@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+// The php.ini setting phar.readonly must be set to 0
+
+require_once dirname(__DIR__).'/vendor/autoload.php';
+
+use SixtyNine\Timesheep\Console\Command\CreatePharCommand;
+use Symfony\Component\Console\Application;
+
+$app = new Application('Timesheep PHAR builder');
+$app->add(new CreatePharCommand());
+$app->run();

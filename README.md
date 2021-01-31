@@ -14,6 +14,8 @@ vendor/bin/doctrine orm:schema-tool:create -q
 
 ## Usage
 
+See also [Listing entries](doc/entries-list.md).
+
 ### Creating entries
 
 ```bash
@@ -47,3 +49,15 @@ bin/ts ls --from "last week" --week
 # List all entries of this month
 bin/ts ls --month
 ```
+
+## PHAR (experimental)
+
+Timesheep can be run as a standalone app.
+
+`./build/create-phar phar` will create:
+
+ * `dist/ts` - the Timesheep executable
+ * `dist/database.db` - an empty database
+
+The current situation is that `ts` must be run from the `dist`
+directory in order it finds the database.
