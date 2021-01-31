@@ -5,14 +5,9 @@ require_once dirname(__DIR__).'/vendor/autoload.php';
 
 use SixtyNine\Timesheep\Bootstrap;
 use SixtyNine\Timesheep\Console\Application;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 
-$logFile = __DIR__.'/../artefacts/timesheep.log';
-$logger = new Logger('timesheep');
-$logger->pushHandler(new StreamHandler($logFile));
-$container = Bootstrap::boostrap($logger);
+$container = Bootstrap::boostrap();
 
-$application = new Application($container, $logger);
+$application = new Application($container);
 $application->run();
 
