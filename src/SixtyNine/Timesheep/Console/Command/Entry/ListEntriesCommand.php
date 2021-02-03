@@ -2,14 +2,12 @@
 
 namespace SixtyNine\Timesheep\Console\Command\Entry;
 
-use DateTimeImmutable;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Model\DataTable\Builder\EntriesDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\StatsDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\SymfonyConsoleDataTable;
-use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

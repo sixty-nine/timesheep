@@ -2,9 +2,6 @@
 
 namespace SixtyNine\Timesheep\Model;
 
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
-use SixtyNine\Timesheep\Model\DataTable\DataTable;
-
 class ProjectStatistics
 {
     /** @var array */

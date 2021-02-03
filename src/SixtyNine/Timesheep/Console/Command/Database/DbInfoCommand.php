@@ -4,7 +4,6 @@ namespace SixtyNine\Timesheep\Console\Command\Database;
 
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Helper\Numbers;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
