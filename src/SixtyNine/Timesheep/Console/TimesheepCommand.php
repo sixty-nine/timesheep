@@ -2,10 +2,8 @@
 
 namespace SixtyNine\Timesheep\Console;
 
-use Doctrine\Common\Persistence\ObjectRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use http\Exception\InvalidArgumentException;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
@@ -113,5 +111,32 @@ abstract class TimesheepCommand extends Command implements ContainerAwareInterfa
         $res = $helper->ask($input, $output, $question);
         $output->writeln('');
         return $res;
+    }
+
+    protected function getPeriodFromParams(InputInterface $input): Period
+    {
+        /** @var string $fromStr */
+        $fromStr = $input->getOption('from');
+        /** @var string $toStr */
+        $toStr = $input->getOption('to');
+        $period = new Period(
+            $fromStr ? new DateTimeImmutable($fromStr) : null,
+            $toStr ? new DateTimeImmutable($toStr) : null
+        );
+
+        if ($input->getOption('week')) {
+            return Period::getWeek($period->getFirstDateOrToday());
+        }
+
+        if ($input->getOption('month')) {
+            return Period::getMonth($period->getFirstDateOrToday());
+        }
+
+        if ($input->getOption('day')) {
+            $day = $period->getFirstDateOrToday();
+            return new Period($day, $day);
+        }
+
+        return $period;
     }
 }

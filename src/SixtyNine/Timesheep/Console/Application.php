@@ -33,10 +33,16 @@ class Application extends BaseApp
             new Command\Project\ListProjectsCommand(),
             new Command\Project\AddProjectCommand(),
             new Command\Project\RemoveProjectCommand(),
+
             new Command\Entry\ListEntriesCommand(),
             new Command\Entry\AddEntryCommand(),
             new Command\Entry\EditEntryCommand(),
             new Command\Entry\DeleteEntryCommand(),
+
+            new Command\Stats\EntriesStatsCommand(),
+            new Command\Stats\ProjectStatsCommand(),
+            new Command\Stats\PresenceStatsCommand(),
+
             new Command\Database\ArchiveDbCommand(),
             new Command\Database\BackupDbCommand(),
             new Command\Database\DbInfoCommand(),
