@@ -9,7 +9,6 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Dotenv\Dotenv;
 use Psr\Log\LoggerInterface;
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class Bootstrap
@@ -65,8 +64,6 @@ class Bootstrap
         $container
             ->register('em', EntityManager::class)
             ->setFactory([self::class, 'createEntityManager']);
-
-        $container->register('datetime-helper', DateTimeHelper::class);
 
         return $container;
     }

@@ -10,7 +10,7 @@ use Exception;
 
 class DateTimeHelper
 {
-    public function mutableFromImmutable(DateTimeImmutable $in)
+    public static function mutableFromImmutable(DateTimeImmutable $in)
     {
         return DateTime::createFromFormat(
             DateTimeInterface::ATOM,
@@ -25,13 +25,13 @@ class DateTimeHelper
      * @return DateTimeImmutable
      * @throws Exception
      */
-    public function roundTime(DateTimeImmutable $datetime, $precision = 30): DateTimeImmutable
+    public static function roundTime(DateTimeImmutable $datetime, $precision = 30): DateTimeImmutable
     {
         if ($precision === 0) {
             return $datetime;
         }
 
-        $dt = $this->mutableFromImmutable($datetime);
+        $dt = self::mutableFromImmutable($datetime);
 
         // 1) Set number of seconds to 0 (by rounding up to the nearest minute if necessary)
         $second = (int)$dt->format('s');
@@ -60,7 +60,7 @@ class DateTimeHelper
      * @param float $decimal
      * @return string
      */
-    public function decimalToTime(float $decimal): string
+    public static function decimalToTime(float $decimal): string
     {
         return sprintf(
             '%s:%02s',
@@ -74,7 +74,7 @@ class DateTimeHelper
      * @return DateTimeImmutable
      * @throws Exception
      */
-    public function getFirstNotNullOrToday(array $dates): DateTimeImmutable
+    public static function getFirstNotNullOrToday(array $dates): DateTimeImmutable
     {
         foreach ($dates as $date) {
             if (null !== $date) {

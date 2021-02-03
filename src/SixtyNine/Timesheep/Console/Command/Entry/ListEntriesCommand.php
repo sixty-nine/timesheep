@@ -58,7 +58,7 @@ class ListEntriesCommand extends TimesheepCommand
         $stats = $statsService->getProjectStats($period);
 
         if ($displayStats) {
-            $table = StatsDataTableBuilder::build($stats, $this->dtHelper);
+            $table = StatsDataTableBuilder::build($stats);
         } elseif ($displayPresence) {
             $table = SymfonyConsoleDataTable::fromDataTable(
                 PresenceDataTableBuilder::build($entries, $dateFormat, $timeFormat)
@@ -69,6 +69,6 @@ class ListEntriesCommand extends TimesheepCommand
 
         $io->outputPeriod($period, $dateFormat);
         $io->outputTable($table, $this->config->get('console.box-style'));
-        $io->outputSummary($stats, $this->dtHelper);
+        $io->outputSummary($stats);
     }
 }

@@ -42,10 +42,10 @@ class ProjectStatsCommand extends TimesheepCommand
 
         $stats = $statsService->getProjectStats($period);
 
-        $table = StatsDataTableBuilder::build($stats, $this->dtHelper);
+        $table = StatsDataTableBuilder::build($stats);
 
         $io->outputPeriod($period, $dateFormat);
         $io->outputTable($table, $this->config->get('console.box-style'));
-        $io->outputSummary($stats, $this->dtHelper);
+        $io->outputSummary($stats);
     }
 }

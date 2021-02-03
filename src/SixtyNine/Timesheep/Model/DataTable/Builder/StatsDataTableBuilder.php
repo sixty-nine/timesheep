@@ -9,8 +9,7 @@ use SixtyNine\Timesheep\Model\ProjectStatistics;
 class StatsDataTableBuilder
 {
     public static function build(
-        ProjectStatistics $stats,
-        DateTimeHelper $dtHelper
+        ProjectStatistics $stats
     ): DataTable {
 
         $table = new DataTable(['Project', 'Duration', 'Decimal']);
@@ -18,7 +17,7 @@ class StatsDataTableBuilder
         foreach ($stats->getProjectsHours() as $project => $hours) {
             $table->addRow([
                 $project,
-                sprintf('%sh', $hours), $dtHelper->decimalToTime($hours)
+                sprintf('%sh', $hours), DateTimeHelper::decimalToTime($hours)
             ]);
         }
 

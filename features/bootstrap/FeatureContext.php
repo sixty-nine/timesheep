@@ -36,8 +36,6 @@ class FeatureContext implements Context
     private $container;
     /** @var ProjectStatistics */
     private $stats;
-    /** @var DateTimeHelper */
-    private $dtHelper;
 
     public function __construct()
     {
@@ -45,7 +43,6 @@ class FeatureContext implements Context
         $this->em = $this->container->get('em');
         $this->entryRepo = $this->em->getRepository(Entry::class);
         $this->projRepo = $this->em->getRepository(Project::class);
-        $this->dtHelper = $this->container->get('datetime-helper');
     }
 
     /**
@@ -100,7 +97,7 @@ class FeatureContext implements Context
     public function iShouldHaveAnEntryStartingAt(DateTimeImmutable $start, string $project = null): void
     {
         $rounding = getenv('TIME_ROUNDING');
-        $rounded = $this->dtHelper->roundTime($start, $rounding);
+        $rounded = DateTimeHelper::roundTime($start, $rounding);
         $entry = $this->entryRepo->findEntryStartingAt($rounded, $project);
         Assert::notNull($entry, sprintf('No entry starting at %s found', $rounded->format(DateTimeInterface::ATOM)));
     }
@@ -113,7 +110,7 @@ class FeatureContext implements Context
     {
         $start = new DateTimeImmutable();
         $rounding = getenv('TIME_ROUNDING');
-        $rounded = $this->dtHelper->roundTime($start, $rounding);
+        $rounded = DateTimeHelper::roundTime($start, $rounding);
         $entry = $this->entryRepo->findEntryStartingAt($rounded, $project);
         Assert::notNull($entry, sprintf('No entry starting at %s found', $rounded->format(DateTimeInterface::ATOM)));
     }

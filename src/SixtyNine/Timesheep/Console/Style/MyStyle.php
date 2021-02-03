@@ -42,11 +42,11 @@ class MyStyle extends SymfonyStyle
         $this->table($table->getHeaders(), $table->getRows(), $style);
     }
 
-    public function outputSummary(ProjectStatistics $stats, DateTimeHelper $dtHelper): void
+    public function outputSummary(ProjectStatistics $stats): void
     {
         $total = $stats->getTotal();
         $this->writeln([
-            sprintf('Total: <info>%sh</info>', $dtHelper->decimalToTime($total)),
+            sprintf('Total: <info>%sh</info>', DateTimeHelper::decimalToTime($total)),
             sprintf('Decimal: <info>%sh</info>', $total),
             '',
         ]);

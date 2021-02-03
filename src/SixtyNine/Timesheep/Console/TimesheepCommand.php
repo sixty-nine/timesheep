@@ -5,7 +5,6 @@ namespace SixtyNine\Timesheep\Console;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Config;
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Entity\Project;
@@ -30,8 +29,6 @@ abstract class TimesheepCommand extends Command implements ContainerAwareInterfa
     protected $entriesRepo;
     /** @var ProjectRepository */
     protected $projectRepo;
-    /** @var DateTimeHelper */
-    protected $dtHelper;
     /** @var Config */
     protected $config;
 
@@ -54,10 +51,6 @@ abstract class TimesheepCommand extends Command implements ContainerAwareInterfa
         /** @var PRojectRepository $repo */
         $repo = $this->em->getRepository(Project::class);
         $this->projectRepo = $repo;
-
-        /** @var DateTimeHelper $dtHelper */
-        $dtHelper = $this->container->get('datetime-helper');
-        $this->dtHelper = $dtHelper;
 
         /** @var Config $config */
         $config = $this->container->get('config');
