@@ -2,10 +2,7 @@
 
 namespace SixtyNine\Timesheep\Console\Command\Project;
 
-use Doctrine\ORM\EntityManager;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
-use SixtyNine\Timesheep\Storage\Entity\Project;
-use SixtyNine\Timesheep\Storage\Repository\ProjectRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

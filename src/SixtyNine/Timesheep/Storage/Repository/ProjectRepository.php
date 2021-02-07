@@ -38,4 +38,31 @@ class ProjectRepository extends EntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+
+    public function findDuplicates(): array
+    {
+        $visited = [];
+        $duplicated = [];
+        $all = $this->createQueryBuilder('p')->getQuery()->getResult();
+
+        /** @var Project $project */
+        foreach ($all as $project) {
+            $normalizedName = $project->getNormalizedName();
+
+            if (array_key_exists($normalizedName, $visited)) {
+                if (!array_key_exists($normalizedName, $duplicated)) {
+                    $duplicated[$normalizedName] = [
+                        $visited[$normalizedName]->toArray()
+                    ];
+                }
+
+                $duplicated[$normalizedName][] = $project->toArray();
+            }
+
+            $visited[$normalizedName] = $project;
+        }
+
+        return $duplicated;
+    }
 }

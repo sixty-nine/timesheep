@@ -57,6 +57,14 @@ class Project
     }
 
     /**
+     * @return string
+     */
+    public function getNormalizedName(): string
+    {
+        return strtoupper(trim($this->getName()));
+    }
+
+    /**
      * @param string $name
      * @return Project
      */
@@ -64,5 +72,32 @@ class Project
     {
         $this->name = $name;
         return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     * @return Project
+     */
+    public function setDescription(string $description): Project
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'decription' => $this->getDescription(),
+        ];
     }
 }
