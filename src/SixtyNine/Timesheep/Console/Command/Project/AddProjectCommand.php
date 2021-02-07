@@ -10,12 +10,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 class AddProjectCommand extends TimesheepCommand
 {
-    use ContainerAwareTrait;
-
     protected static $defaultName = 'proj:add';
 
     protected function configure()
@@ -29,10 +26,6 @@ class AddProjectCommand extends TimesheepCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        /** @var EntityManager $em */
-        $em = $this->container->get('em');
-        /** @var ProjectRepository $repo */
-        $repo = $em->getRepository(Project::class);
         $name = $input->getArgument('name');
 
         $io->title('Create a new project');
@@ -46,12 +39,12 @@ class AddProjectCommand extends TimesheepCommand
             return 1;
         }
 
-        if ($repo->exists($name)) {
+        if ($this->projectRepo->exists($name)) {
             $io->error(sprintf('The project "%s" already exists', $name));
             return 1;
         }
 
-        $proj = $repo->create($name);
+        $proj = $this->projectRepo->create($name);
 
         $io->writeln(sprintf(
             'Project <info>%s</info> created (id = <info>%s</info>)',

@@ -12,12 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 class AddEntryCommand extends TimesheepCommand
 {
-    use ContainerAwareTrait;
-
     protected static $defaultName = 'entry:add';
 
     protected function configure()
@@ -37,14 +34,7 @@ class AddEntryCommand extends TimesheepCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
 
-        /** @var EntityManager $em */
-        $em = $this->container->get('em');
-        /** @var EntryRepository $repo */
-        $repo = $em->getRepository(Entry::class);
-        /** @var Config $config */
-        $config = $this->container->get('config');
-
-        $format = $config->get('format.datetime');
+        $format = $this->config->get('format.datetime');
 
         /** @var string $force */
         $force = $input->getOption('force');
@@ -61,7 +51,7 @@ class AddEntryCommand extends TimesheepCommand
         $period = $this->inputTime($input, $io);
 
         if (!$force && !$project) {
-            $project = $this->inputProject($input, $output, $em);
+            $project = $this->inputProject($input, $output, $this->em);
         }
 
         if (!$force && !$task) {
@@ -82,7 +72,7 @@ class AddEntryCommand extends TimesheepCommand
             sprintf('Description: <info>%s</info>', $description),
         ]);
 
-        if ($entry = $repo->checkNoCrossingEntries($period)) {
+        if ($entry = $this->entriesRepo->checkNoCrossingEntries($period)) {
             $io->error(['There is another entry crossing this one', $entry]);
             return 1;
         }
@@ -92,7 +82,7 @@ class AddEntryCommand extends TimesheepCommand
             return 1;
         }
 
-        $repo->create($period, $project ?? '', $task ?? '', $description ?? '');
+        $this->entriesRepo->create($period, $project ?? '', $task ?? '', $description ?? '');
         $io->writeln('Entry created');
     }
 }

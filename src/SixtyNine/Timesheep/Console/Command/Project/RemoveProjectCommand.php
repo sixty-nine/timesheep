@@ -11,12 +11,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 class RemoveProjectCommand extends TimesheepCommand
 {
-    use ContainerAwareTrait;
-
     protected static $defaultName = 'proj:remove';
 
     protected function configure()
@@ -31,14 +28,7 @@ class RemoveProjectCommand extends TimesheepCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        /**
- * @var EntityManager $em
-*/
-        $em = $this->container->get('em');
-        /**
- * @var ProjectRepository $repo
-*/
-        $repo = $em->getRepository(Project::class);
+
         $name = $input->getArgument('name');
         $force = (bool)$input->getOption('force');
 
@@ -53,7 +43,7 @@ class RemoveProjectCommand extends TimesheepCommand
             return 1;
         }
 
-        if (!$repo->exists($name)) {
+        if (!$this->projectRepo->exists($name)) {
             $io->error(sprintf('The project "%s" does exists', $name));
             return 1;
         }
@@ -63,7 +53,7 @@ class RemoveProjectCommand extends TimesheepCommand
             return 1;
         }
 
-        $repo->delete($name);
+        $this->projectRepo->delete($name);
 
         $io->writeln(sprintf('Project <info>%s</info> removed.', $name));
     }
