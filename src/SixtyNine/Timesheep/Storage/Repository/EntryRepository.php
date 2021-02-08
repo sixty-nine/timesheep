@@ -163,4 +163,24 @@ class EntryRepository extends EntityRepository
 
         return false;
     }
+
+    public function getLastProjectUsage(string $name): ?DateTimeImmutable
+    {
+        $res = $this
+            ->createQueryBuilder('e')
+            ->andWhere('e.project = :project')
+            ->setParameter('project', $name)
+            ->orderBy('e.start', 'desc')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->execute();
+
+        if (!$res) {
+            return null;
+        }
+
+        /** @var Entry $res */
+        $res = reset($res);
+        return $res->getStart();
+    }
 }
