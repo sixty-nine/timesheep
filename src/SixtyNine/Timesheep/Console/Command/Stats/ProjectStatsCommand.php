@@ -26,26 +26,32 @@ class ProjectStatsCommand extends TimesheepCommand
             ->addOption('week', null, InputOption::VALUE_NONE, 'Whole week')
             ->addOption('month', null, InputOption::VALUE_NONE, 'Whole month')
             ->addOption('day', null, InputOption::VALUE_NONE, 'Whole day')
+            ->addOption('csv', null, InputOption::VALUE_NONE, 'Output as CSV')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new MyStyle($input, $output);
-        $io->title('Project stats');
 
         $dateFormat = $this->config->get('format.date');
 
         $statsService = new StatisticsService($this->em);
 
         $period = $this->getPeriodFromParams($input);
+        $csvOutput = $input->getOption('csv');
 
         $stats = $statsService->getProjectStats($period);
 
         $table = StatsDataTableBuilder::build($stats);
 
-        $io->outputPeriod($period, $dateFormat);
-        $io->outputTable($table, $this->config->get('console.box-style'));
-        $io->outputSummary($stats);
+        if ($csvOutput) {
+            $io->outputCsv($table, ';');
+        } else {
+            $io->title('Project stats');
+            $io->outputPeriod($period, $dateFormat);
+            $io->outputTable($table, $this->config->get('console.box-style'));
+            $io->outputSummary($stats);
+        }
     }
 }

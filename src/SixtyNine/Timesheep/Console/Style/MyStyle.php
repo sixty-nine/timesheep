@@ -42,6 +42,24 @@ class MyStyle extends SymfonyStyle
         $this->table($table->getHeaders(), $table->getRows(), $style);
     }
 
+    public function outputCsv(DataTable $table, $delimiter = ',', $quotes = '"'): void
+    {
+        $quote = static function (array $arr) use ($quotes) {
+            return array_map(static function (string $item) use ($quotes) {
+                return sprintf('%s%s%s', $quotes, trim($item), $quotes);
+            }, $arr);
+        };
+
+        $this->writeln(implode($delimiter, $quote($table->getHeaders())));
+
+        foreach ($table->getRows() as $row) {
+            if (is_object($row)) {
+                continue;
+            }
+            $this->writeln(implode($delimiter, $quote($row)));
+        }
+    }
+
     public function outputSummary(ProjectStatistics $stats): void
     {
         $total = $stats->getTotal();

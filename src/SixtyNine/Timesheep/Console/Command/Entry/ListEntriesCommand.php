@@ -27,15 +27,15 @@ class ListEntriesCommand extends TimesheepCommand
             ->addOption('week', null, InputOption::VALUE_NONE, 'Whole week')
             ->addOption('month', null, InputOption::VALUE_NONE, 'Whole month')
             ->addOption('day', null, InputOption::VALUE_NONE, 'Whole day')
-            ->addoption('stats', null, InputOption::VALUE_NONE, 'Display the project stats')
-            ->addoption('presence', null, InputOption::VALUE_NONE, 'Display presence time')
+            ->addOption('stats', null, InputOption::VALUE_NONE, 'Display the project stats')
+            ->addOption('presence', null, InputOption::VALUE_NONE, 'Display presence time')
+            ->addOption('csv', null, InputOption::VALUE_NONE, 'Output as CSV')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new MyStyle($input, $output);
-        $io->title('Entries');
 
         $dateFormat = $this->config->get('format.date');
         $timeFormat = $this->config->get('format.time');
@@ -45,6 +45,8 @@ class ListEntriesCommand extends TimesheepCommand
         // --- Process parameters
         $displayStats = $input->getOption('stats');
         $displayPresence = $input->getOption('presence');
+        $csvOutput = $input->getOption('csv');
+        $aggregateDate = !$csvOutput;
 
         if ($displayStats && $displayPresence) {
             throw new \InvalidArgumentException(
@@ -61,14 +63,19 @@ class ListEntriesCommand extends TimesheepCommand
             $table = StatsDataTableBuilder::build($stats);
         } elseif ($displayPresence) {
             $table = SymfonyConsoleDataTable::fromDataTable(
-                PresenceDataTableBuilder::build($entries, $dateFormat, $timeFormat)
+                PresenceDataTableBuilder::build($entries, $dateFormat, $timeFormat, $aggregateDate)
             );
         } else {
-            $table = EntriesDataTableBuilder::build($entries, $dateFormat, $timeFormat);
+            $table = EntriesDataTableBuilder::build($entries, $dateFormat, $timeFormat, $aggregateDate);
         }
 
-        $io->outputPeriod($period, $dateFormat);
-        $io->outputTable($table, $this->config->get('console.box-style'));
-        $io->outputSummary($stats);
+        if ($csvOutput) {
+            $io->outputCsv($table, ';');
+        } else {
+            $io->title('Entries');
+            $io->outputPeriod($period, $dateFormat);
+            $io->outputTable($table, $this->config->get('console.box-style'));
+            $io->outputSummary($stats);
+        }
     }
 }
