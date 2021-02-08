@@ -18,12 +18,12 @@ class ProjectRepository extends EntityRepository
 
     public function exists(string $name): bool
     {
-        return (bool)$this->findOneBy(['name' => $name]);
+        return (bool)$this->findOneBy(['name' => Project::normalizeName($name)]);
     }
 
     public function create(string $name): Project
     {
-        $proj = new Project($name);
+        $proj = new Project(Project::normalizeName($name));
         $this->getEntityManager()->persist($proj);
         $this->getEntityManager()->flush($proj);
         return $proj;
@@ -31,7 +31,7 @@ class ProjectRepository extends EntityRepository
 
     public function delete(string $name): void
     {
-        $proj = $this->findOneBy(['name' => $name]);
+        $proj = $this->findOneBy(['name' => Project::normalizeName($name)]);
 
         if ($proj) {
             $this->getEntityManager()->remove($proj);

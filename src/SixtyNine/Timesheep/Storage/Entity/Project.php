@@ -40,6 +40,11 @@ class Project
         $this->name = $name;
     }
 
+    public static function normalizeName(string $name): string
+    {
+        return strtoupper(trim($name));
+    }
+
     /**
      * @return int
      */
@@ -61,7 +66,7 @@ class Project
      */
     public function getNormalizedName(): string
     {
-        return strtoupper(trim($this->getName()));
+        return self::normalizeName($this->getName());
     }
 
     /**
