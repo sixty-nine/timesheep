@@ -48,7 +48,7 @@ class EntryRepository extends EntityRepository
         $entry
             ->setStart($start)
             ->setEnd($period->getEnd())
-            ->setProject($project)
+            ->setProject(Project::normalizeName($project))
             ->setTask($task)
             ->setDescription($description)
         ;
