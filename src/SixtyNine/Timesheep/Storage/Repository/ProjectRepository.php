@@ -8,7 +8,7 @@ use SixtyNine\Timesheep\Storage\Entity\Project;
 
 class ProjectRepository extends EntityRepository
 {
-    public function findAll()
+    public function findAll(): array
     {
         return $this
             ->createQueryBuilder('p')

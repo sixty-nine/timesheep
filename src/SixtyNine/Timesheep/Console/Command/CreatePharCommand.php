@@ -15,12 +15,12 @@ class CreatePharCommand extends Command
 {
     protected static $defaultName = 'phar';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Create the Timesheep PHAR.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $rootDir = dirname(__DIR__, 5);
         $tempDir = sys_get_temp_dir().'/ts-phar';
@@ -90,6 +90,8 @@ class CreatePharCommand extends Command
         }
 
         $output->writeln(PHP_EOL.'Done');
+
+        return 0;
     }
 
     private function runOrFail(array $commands, string $errorMsg = null): void

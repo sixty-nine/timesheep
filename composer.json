@@ -19,7 +19,7 @@
         "roave/security-advisories": "dev-master",
         "phpunit/phpunit": "^8.2",
         "squizlabs/php_codesniffer": "~3.4",
-        "phpstan/phpstan": "^0.11.8",
+        "phpstan/phpstan": "^0.12",
         "behat/behat": "^3.5",
         "symfony/process": "^4.3"
     },

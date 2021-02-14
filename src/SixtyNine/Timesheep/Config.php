@@ -6,6 +6,7 @@ use SixtyNine\Timesheep\Helper\Arrays;
 
 class Config
 {
+    /** @var array<array> */
     protected $config = [];
 
     /**

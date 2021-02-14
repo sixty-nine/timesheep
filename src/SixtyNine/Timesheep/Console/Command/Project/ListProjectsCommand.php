@@ -12,14 +12,14 @@ class ListProjectsCommand extends TimesheepCommand
 {
     protected static $defaultName = 'proj:list';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('List all the projects.')
             ->setAliases(['proj:ls', 'p:ls']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
         $io->title('Projects');
@@ -40,5 +40,7 @@ class ListProjectsCommand extends TimesheepCommand
         $table = new DataTable($headers, $projects);
 
         $io->outputTable($table, $this->config->get('console.box-style'));
+
+        return 0;
     }
 }

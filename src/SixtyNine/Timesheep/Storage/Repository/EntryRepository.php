@@ -4,6 +4,7 @@ namespace SixtyNine\Timesheep\Storage\Repository;
 
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Entity\Project;
@@ -58,7 +59,7 @@ class EntryRepository extends EntityRepository
         return $entry;
     }
 
-    public function findEntry(Period $period, string $project = null)
+    public function findEntry(Period $period, string $project = null): object
     {
         $qb = $this
             ->createQueryBuilder('e')
@@ -80,7 +81,7 @@ class EntryRepository extends EntityRepository
         ;
     }
 
-    public function findEntryStartingAt(DateTimeImmutable $start, string $project = null)
+    public function findEntryStartingAt(DateTimeImmutable $start, string $project = null): array
     {
         $qb = $this
             ->createQueryBuilder('e')
@@ -106,7 +107,7 @@ class EntryRepository extends EntityRepository
         return $this->findBy(['end' => null]);
     }
 
-    public function findCrossingEntries(Period $period)
+    public function findCrossingEntries(Period $period): array
     {
         return $this
             ->createQueryBuilder('e')
@@ -122,7 +123,7 @@ class EntryRepository extends EntityRepository
         ;
     }
 
-    protected function getBaseQueryBuilder(Period $period = null)
+    protected function getBaseQueryBuilder(Period $period = null): QueryBuilder
     {
         $qb = $this
             ->createQueryBuilder('e')
@@ -130,14 +131,13 @@ class EntryRepository extends EntityRepository
         ;
 
         if ($period) {
-            /** @var DateTimeImmutable $start */
             if ($start = $period->getStart()) {
                 $qb
                     ->andWhere('e.start >= :from')
                     ->setParameter('from', $start->setTime(0, 0))
                 ;
             }
-            /** @var DateTimeImmutable $end */
+
             if ($end = $period->getEnd()) {
                 $qb
                     ->andWhere('e.end <= :to')
@@ -157,7 +157,6 @@ class EntryRepository extends EntityRepository
     {
         $crossingEntries = $this->findCrossingEntries($period);
         if (0 < count($crossingEntries)) {
-            /** @var Entry $firstEntry */
             return $crossingEntries[0];
         }
 

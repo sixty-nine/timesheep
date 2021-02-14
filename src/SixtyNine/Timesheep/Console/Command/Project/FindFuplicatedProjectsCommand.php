@@ -12,7 +12,7 @@ class FindFuplicatedProjectsCommand extends TimesheepCommand
 {
     protected static $defaultName = 'proj:duplicates';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Find duplicates project.')
@@ -20,7 +20,7 @@ class FindFuplicatedProjectsCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
 
@@ -39,5 +39,7 @@ class FindFuplicatedProjectsCommand extends TimesheepCommand
 
         $io->outputTable($table, $this->config->get('console.box-style'));
         $output->writeln('');
+
+        return 0;
     }
 }

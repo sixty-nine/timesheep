@@ -32,7 +32,7 @@ abstract class TimesheepCommand extends Command implements ContainerAwareInterfa
     /** @var Config */
     protected $config;
 
-    public function setContainer(ContainerInterface $container = null)
+    public function setContainer(ContainerInterface $container = null): void
     {
         if (null === $container) {
             throw new \InvalidArgumentException('No container');

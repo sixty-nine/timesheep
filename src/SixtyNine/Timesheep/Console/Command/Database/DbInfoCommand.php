@@ -18,14 +18,15 @@ class DbInfoCommand extends TimesheepCommand
         $this->setDescription('Get information about the database.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $dateFormat = $this->config->get('format.date');
 
         $io = new MyStyle($input, $output);
 
         $dbParams = $this->em->getConnection()->getParams();
-        $dbSize = Numbers::humanFileSize(filesize($dbParams['path']));
+        $size = filesize($dbParams['path']);
+        $dbSize = Numbers::humanFileSize($size ?: 0);
 
         $allProjects = $this->projectRepo->findAll();
         $allEntries = $this->entriesRepo->findAll();
@@ -65,5 +66,7 @@ class DbInfoCommand extends TimesheepCommand
 
         $output->writeln('');
         $output->writeln('');
+
+        return 0;
     }
 }

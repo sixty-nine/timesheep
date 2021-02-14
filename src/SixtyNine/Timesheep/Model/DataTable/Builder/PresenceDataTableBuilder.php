@@ -11,9 +11,9 @@ class PresenceDataTableBuilder
 {
     public static function build(
         array $entries,
-        $dateFormat = 'd-m-Y',
-        $timeFormat = 'H:i',
-        $aggregateDate = true
+        string $dateFormat = 'd-m-Y',
+        string $timeFormat = 'H:i',
+        bool $aggregateDate = true
     ): DataTable {
 
         $periods = array_map(static function (Entry $entry) {

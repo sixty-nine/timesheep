@@ -17,7 +17,7 @@ class ListEntriesCommand extends TimesheepCommand
 {
     protected static $defaultName = 'entry:list';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('List all the entries.')
@@ -33,7 +33,7 @@ class ListEntriesCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
 
@@ -77,5 +77,7 @@ class ListEntriesCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
         }
+
+        return 0;
     }
 }

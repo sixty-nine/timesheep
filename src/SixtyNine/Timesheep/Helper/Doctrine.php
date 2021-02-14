@@ -6,7 +6,7 @@ use Doctrine\DBAL\Connection;
 
 class Doctrine
 {
-    public static function truncateAll(Connection $connection)
+    public static function truncateAll(Connection $connection): void
     {
         $connection->getConfiguration()->setSQLLogger();
         $isSqlite = 'pdo_sqlite' === $connection->getDriver()->getName();

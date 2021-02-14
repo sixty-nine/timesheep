@@ -14,8 +14,11 @@ class MyStyle extends SymfonyStyle
     /**
      * {@inheritdoc}
      */
-    public function table(array $headers, array $rows, $styleName = 'symfony-style-guide')
-    {
+    public function table(
+        array $headers,
+        array $rows,
+        string $styleName = 'symfony-style-guide'
+    ): void {
         $style = clone Table::getStyleDefinition($styleName);
         $style->setCellHeaderFormat('<info>%s</info>');
 
@@ -42,8 +45,11 @@ class MyStyle extends SymfonyStyle
         $this->table($table->getHeaders(), $table->getRows(), $style);
     }
 
-    public function outputCsv(DataTable $table, $delimiter = ',', $quotes = '"'): void
-    {
+    public function outputCsv(
+        DataTable $table,
+        string $delimiter = ',',
+        string $quotes = '"'
+    ): void {
         $quote = static function (array $arr) use ($quotes) {
             return array_map(static function (string $item) use ($quotes) {
                 return sprintf('%s%s%s', $quotes, trim($item), $quotes);

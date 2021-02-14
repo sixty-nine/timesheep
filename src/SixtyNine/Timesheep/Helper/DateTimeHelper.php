@@ -10,12 +10,18 @@ use Exception;
 
 class DateTimeHelper
 {
-    public static function mutableFromImmutable(DateTimeImmutable $in)
+    public static function mutableFromImmutable(DateTimeImmutable $in): DateTime
     {
-        return DateTime::createFromFormat(
+        $dt = DateTime::createFromFormat(
             DateTimeInterface::ATOM,
             $in->format(DateTimeInterface::ATOM)
         );
+
+        if (!$dt) {
+            throw new \InvalidArgumentException('Invalid immutable date/time');
+        }
+
+        return $dt;
     }
 
     /**

@@ -15,7 +15,7 @@ class PresenceStatsCommand extends TimesheepCommand
 {
     protected static $defaultName = 'stats:presence';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription(
@@ -30,7 +30,7 @@ class PresenceStatsCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
         $dateFormat = $this->config->get('format.date');
@@ -59,5 +59,7 @@ class PresenceStatsCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
         }
+
+        return 0;
     }
 }

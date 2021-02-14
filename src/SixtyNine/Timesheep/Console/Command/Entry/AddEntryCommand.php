@@ -2,11 +2,7 @@
 
 namespace SixtyNine\Timesheep\Console\Command\Entry;
 
-use Doctrine\ORM\EntityManager;
-use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
-use SixtyNine\Timesheep\Storage\Entity\Entry;
-use SixtyNine\Timesheep\Storage\Repository\EntryRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,7 +13,7 @@ class AddEntryCommand extends TimesheepCommand
 {
     protected static $defaultName = 'entry:add';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Add a new entry.')
@@ -31,7 +27,7 @@ class AddEntryCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
         $format = $this->config->get('format.datetime');
@@ -84,5 +80,7 @@ class AddEntryCommand extends TimesheepCommand
 
         $this->entriesRepo->create($period, $project ?? '', $task ?? '', $description ?? '');
         $io->writeln('Entry created');
+
+        return 0;
     }
 }

@@ -4,8 +4,12 @@ namespace SixtyNine\Timesheep\Helper;
 
 class Objects
 {
-    public static function implements($class, $interface): bool
+    public static function implements(object $class, string $interface): bool
     {
-        return array_key_exists($interface, class_implements($class));
+        $implements = class_implements($class);
+        if (!$implements) {
+            return false;
+        }
+        return array_key_exists($interface, $implements);
     }
 }

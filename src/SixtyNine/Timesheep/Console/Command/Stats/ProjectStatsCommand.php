@@ -14,7 +14,7 @@ class ProjectStatsCommand extends TimesheepCommand
 {
     protected static $defaultName = 'stats:project';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription(
@@ -30,7 +30,7 @@ class ProjectStatsCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
 
@@ -53,5 +53,7 @@ class ProjectStatsCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
         }
+
+        return 0;
     }
 }

@@ -14,7 +14,7 @@ class EntriesStatsCommand extends TimesheepCommand
 {
     protected static $defaultName = 'stats:entries';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription(
@@ -29,7 +29,7 @@ class EntriesStatsCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
 
@@ -54,5 +54,7 @@ class EntriesStatsCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
         }
+
+        return 0;
     }
 }

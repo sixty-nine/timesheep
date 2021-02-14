@@ -12,7 +12,7 @@ class AddProjectCommand extends TimesheepCommand
 {
     protected static $defaultName = 'proj:add';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Create a new project.')
@@ -20,7 +20,7 @@ class AddProjectCommand extends TimesheepCommand
             ->addArgument('name', InputArgument::OPTIONAL, 'The new project name.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $name = $input->getArgument('name');
@@ -48,5 +48,7 @@ class AddProjectCommand extends TimesheepCommand
             $proj->getName(),
             $proj->getId()
         ));
+
+        return 0;
     }
 }

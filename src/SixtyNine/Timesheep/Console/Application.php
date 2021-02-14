@@ -57,12 +57,12 @@ class Application extends BaseApp
     public function add(BaseCommand $command)
     {
         if (Objects::implements($command, LoggerAwareInterface::class)) {
-            /** @var LoggerAwareInterface $command */
+            /** @var BaseCommand & LoggerAwareInterface $command */
             $command->setLogger($this->logger);
         }
 
         if (Objects::implements($command, ContainerAwareInterface::class)) {
-            /** @var ContainerAwareInterface $command */
+            /** @var BaseCommand & ContainerAwareInterface $command */
             $command->setContainer($this->container);
         }
 

@@ -13,7 +13,7 @@ class RemoveProjectCommand extends TimesheepCommand
 {
     protected static $defaultName = 'proj:remove';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Remove an existing project.')
@@ -22,7 +22,7 @@ class RemoveProjectCommand extends TimesheepCommand
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force the removal.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -53,5 +53,7 @@ class RemoveProjectCommand extends TimesheepCommand
         $this->projectRepo->delete($name);
 
         $io->writeln(sprintf('Project <info>%s</info> removed.', $name));
+
+        return 0;
     }
 }

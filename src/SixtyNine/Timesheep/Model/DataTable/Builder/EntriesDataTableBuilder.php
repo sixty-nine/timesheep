@@ -9,9 +9,9 @@ class EntriesDataTableBuilder
 {
     public static function build(
         array $entries,
-        $dateFormat = 'd-m-Y',
-        $timeFormat = 'H:i',
-        $aggregateDate = true
+        string $dateFormat = 'd-m-Y',
+        string $timeFormat = 'H:i',
+        bool $aggregateDate = true
     ): DataTable {
 
         $headers = ['Day', 'From', 'To', 'Duration', 'Project', 'Task', 'Description'];

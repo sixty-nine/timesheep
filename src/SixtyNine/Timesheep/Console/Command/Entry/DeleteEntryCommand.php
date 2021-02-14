@@ -10,14 +10,14 @@ class DeleteEntryCommand extends TimesheepCommand
 {
     protected static $defaultName = 'entry:delete';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Removes an entry.')
             ->setAliases(['e:rm', 'rm']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         throw new \Exception('Not implemented');
     }

@@ -18,12 +18,15 @@ class Setup
     /** @var ConsoleOutput */
     private $output;
 
-    /**
-     * Setup constructor.
-     */
+
     public function __construct()
     {
         $homeDir = posix_getpwuid(posix_getuid());
+
+        if (!$homeDir) {
+            throw new \InvalidArgumentException('Cannot find home directory');
+        }
+
         $this->homeDir = $homeDir['dir'];
         $this->fs = new Filesystem(new Local($this->homeDir));
         $this->output = new ConsoleOutput();
