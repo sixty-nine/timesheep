@@ -1,5 +1,7 @@
 # TimeSheep 🐑
 
+![Run checks](https://github.com/sixty-nine/timesheep/workflows/Run%20checks/badge.svg)
+
 Simple timesheet manager.
 
 ## Install
