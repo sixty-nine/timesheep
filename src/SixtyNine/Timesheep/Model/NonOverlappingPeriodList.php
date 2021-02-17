@@ -55,14 +55,19 @@ class NonOverlappingPeriodList
 
     public function split(string $splitTime = '12:00', int $splitDuration = 30): self
     {
-        $splitPeriod = new self();
+        /** @var Period $lastPeriod */
         $lastPeriod = null;
+        $splitPeriod = new self();
 
         /** @var Period $period */
         foreach ($this->list as $period) {
-            if (null !== $lastPeriod && $lastPeriod->overlaps($period)) {
+            if (null !== $lastPeriod
+                && false !== $lastPeriod
+                && $lastPeriod->overlaps($period)
+            ) {
                 $period = $period->moveAtEnd($lastPeriod);
             }
+
             $split = $period->split($splitTime, $splitDuration);
             $splitPeriod->addPeriods($split);
             $lastPeriod = end($split);

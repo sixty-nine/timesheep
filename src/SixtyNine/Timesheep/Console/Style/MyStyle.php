@@ -2,8 +2,8 @@
 
 namespace SixtyNine\Timesheep\Console\Style;
 
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\DataTable\DataTable;
+use SixtyNine\Timesheep\Model\DateStrings;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
 use Symfony\Component\Console\Helper\Table;
@@ -68,9 +68,10 @@ class MyStyle extends SymfonyStyle
 
     public function outputSummary(ProjectStatistics $stats): void
     {
+        $ds = new DateStrings();
         $total = $stats->getTotal();
         $this->writeln([
-            sprintf('Total: <info>%sh</info>', DateTimeHelper::decimalToTime($total)),
+            sprintf('Total: <info>%sh</info>', $ds->decimalToTime($total)),
             sprintf('Decimal: <info>%sh</info>', $total),
             '',
         ]);

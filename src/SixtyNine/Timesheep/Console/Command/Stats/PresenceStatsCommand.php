@@ -4,9 +4,9 @@ namespace SixtyNine\Timesheep\Console\Command\Stats;
 
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\SymfonyConsoleDataTable;
+use SixtyNine\Timesheep\Model\DateStrings;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -44,6 +44,7 @@ class PresenceStatsCommand extends TimesheepCommand
         $io = new MyStyle($input, $output);
         $dateFormat = $this->config->get('format.date');
         $timeFormat = $this->config->get('format.time');
+        $ds = new DateStrings();
 
         $statsService = new StatisticsService($this->em);
 
@@ -55,7 +56,7 @@ class PresenceStatsCommand extends TimesheepCommand
         /** @var int $splitFor */
         $splitFor = $input->getOption('split-for');
 
-        if ($splitAt && !DateTimeHelper::isValidDate($splitAt, 'H:i')) {
+        if ($splitAt && !$ds->isValidTime($splitAt)) {
             $io->error(['The split-at value must be a valid time in the format H:i:', $splitAt]);
             return 1;
         }

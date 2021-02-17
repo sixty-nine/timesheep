@@ -3,7 +3,7 @@
 namespace SixtyNine\Timesheep\Model;
 
 use DateTimeImmutable;
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
+use DateTimeInterface;
 use Webmozart\Assert\Assert;
 
 class Period
@@ -184,7 +184,7 @@ class Period
         return new Period($this->start, $this->end);
     }
 
-    public function contains(\DateTimeInterface $date): bool
+    public function contains(DateTimeInterface $date): bool
     {
         return $this->start <= $date && $date <= $this->end;
     }
@@ -197,7 +197,7 @@ class Period
      */
     public function split(string $splitTime = '12:00', int $splitDuration = 30): array
     {
-        Assert::true(DateTimeHelper::isValidDate($splitTime, 'H:i'), 'Invalid split time');
+        Assert::true((new DateStrings())->isValidDate($splitTime, 'H:i'), 'Invalid split time');
         Assert::greaterThan($splitDuration, 0, 'The split duration must be greater than zero');
 
         if (null === $this->start || null === $this->end) {
@@ -222,13 +222,17 @@ class Period
     {
         $offsetString = sprintf('+%s minutes', $minutes);
         return new self(
-            $this->start->modify($offsetString),
-            $this->end->modify($offsetString)
+            $this->start ? $this->start->modify($offsetString) : null,
+            $this->end ? $this->end->modify($offsetString) : null
         );
     }
 
     public function moveAtEnd(Period $period): self
     {
+        if (null === $period->getEnd()) {
+            throw  new \InvalidArgumentException('Cannot move at the end');
+        }
+
         return self::fromDuration($period->getEnd(), $this->getDurationMinutes());
     }
 }

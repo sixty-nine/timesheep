@@ -7,7 +7,6 @@ use Behat\Behat\Context\Context;
 use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
 use SixtyNine\Timesheep\Bootstrap;
-use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Helper\Doctrine as DoctrineHelper;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
@@ -43,6 +42,52 @@ class FeatureContext implements Context
         $this->em = $this->container->get('em');
         $this->entryRepo = $this->em->getRepository(Entry::class);
         $this->projRepo = $this->em->getRepository(Project::class);
+    }
+
+
+    /**
+     * From https://stackoverflow.com/a/33195692/643106
+     * @param DateTimeImmutable $datetime
+     * @param int $precision
+     * @return DateTimeImmutable
+     * @throws Exception
+     */
+    protected function roundTime(DateTimeImmutable $datetime, $precision = 30): DateTimeImmutable
+    {
+        if ($precision === 0) {
+            return $datetime;
+        }
+
+        $dt = DateTime::createFromFormat(
+            DateTimeInterface::ATOM,
+            $datetime->format(DateTimeInterface::ATOM)
+        );
+
+        if (!$dt) {
+            throw new \InvalidArgumentException('Invalid immutable date/time');
+        }
+
+        // 1) Set number of seconds to 0 (by rounding up to the nearest minute if necessary)
+        $second = (int)$dt->format('s');
+        if ($second > 30) {
+            // Jumps to the next minute
+            $dt->add(new DateInterval('PT' . (60 - $second) . 'S'));
+        } elseif ($second > 0) {
+            // Back to 0 seconds on current minute
+            $dt->sub(new DateInterval('PT' . $second . 'S'));
+        }
+        // 2) Get minute
+        $minute = (int)$dt->format('i');
+        // 3) Convert modulo $precision
+        $minute %= $precision;
+        if ($minute > 0) {
+            // 4) Count minutes to next $precision-multiple minutes
+            $diff = $precision - $minute;
+            // 5) Add the difference to the original date time
+            $dt->add(new DateInterval('PT' . $diff . 'M'));
+        }
+
+        return DateTimeImmutable::createFromMutable($dt);
     }
 
     /**
@@ -97,7 +142,7 @@ class FeatureContext implements Context
     public function iShouldHaveAnEntryStartingAt(DateTimeImmutable $start, string $project = null): void
     {
         $rounding = getenv('TIME_ROUNDING');
-        $rounded = DateTimeHelper::roundTime($start, $rounding);
+        $rounded = $this->roundTime($start, $rounding);
         $entry = $this->entryRepo->findEntryStartingAt($rounded, $project);
         Assert::notNull($entry, sprintf('No entry starting at %s found', $rounded->format(DateTimeInterface::ATOM)));
     }
@@ -110,7 +155,7 @@ class FeatureContext implements Context
     {
         $start = new DateTimeImmutable();
         $rounding = getenv('TIME_ROUNDING');
-        $rounded = DateTimeHelper::roundTime($start, $rounding);
+        $rounded = $this->roundTime($start, $rounding);
         $entry = $this->entryRepo->findEntryStartingAt($rounded, $project);
         Assert::notNull($entry, sprintf('No entry starting at %s found', $rounded->format(DateTimeInterface::ATOM)));
     }
