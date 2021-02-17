@@ -4,6 +4,7 @@ namespace SixtyNine\Timesheep\Console\Command\Stats;
 
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
+use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\SymfonyConsoleDataTable;
 use SixtyNine\Timesheep\Service\StatisticsService;
@@ -26,6 +27,14 @@ class PresenceStatsCommand extends TimesheepCommand
             ->addOption('week', null, InputOption::VALUE_NONE, 'Whole week')
             ->addOption('month', null, InputOption::VALUE_NONE, 'Whole month')
             ->addOption('day', null, InputOption::VALUE_NONE, 'Whole day')
+            ->addOption('split-at', null, InputOption::VALUE_OPTIONAL, 'Split presence at this time')
+            ->addOption(
+                'split-for',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Split presence for this duration in minutes',
+                30
+            )
             ->addOption('csv', null, InputOption::VALUE_NONE, 'Output as CSV')
         ;
     }
@@ -41,6 +50,16 @@ class PresenceStatsCommand extends TimesheepCommand
         $period = $this->getPeriodFromParams($input);
         $csvOutput = $input->getOption('csv');
 
+        /** @var ?string $splitAt */
+        $splitAt = $input->getOption('split-at');
+        /** @var int $splitFor */
+        $splitFor = $input->getOption('split-for');
+
+        if ($splitAt && !DateTimeHelper::isValidDate($splitAt, 'H:i')) {
+            $io->error(['The split-at value must be a valid time in the format H:i:', $splitAt]);
+            return 1;
+        }
+
         // --- Gather data
 
         $entries = $this->entriesRepo->getAllEntries($period);
@@ -48,7 +67,14 @@ class PresenceStatsCommand extends TimesheepCommand
 
 
         $table = SymfonyConsoleDataTable::fromDataTable(
-            PresenceDataTableBuilder::build($entries, $dateFormat, $timeFormat, !$csvOutput)
+            PresenceDataTableBuilder::build(
+                $entries,
+                $dateFormat,
+                $timeFormat,
+                !$csvOutput,
+                $splitAt,
+                $splitFor
+            )
         );
 
         if ($csvOutput) {

@@ -3,6 +3,7 @@
 namespace SixtyNine\Timesheep\Model;
 
 use DateTimeImmutable;
+use SixtyNine\Timesheep\Helper\DateTimeHelper;
 use Webmozart\Assert\Assert;
 
 class Period
@@ -154,5 +155,39 @@ class Period
     public function duplicate(): Period
     {
         return new Period($this->start, $this->end);
+    }
+
+    public function contains(\DateTimeInterface $date): bool
+    {
+        return $this->start <= $date && $date <= $this->end;
+    }
+
+    /**
+     * @param string $splitTime
+     * @param int $splitDuration
+     * @return array<Period>
+     * @throws \Exception
+     */
+    public function split(string $splitTime = '12:00', int $splitDuration = 30): array
+    {
+        Assert::true(DateTimeHelper::isValidDate($splitTime, 'H:i'), 'Invalid split time');
+        Assert::greaterThan($splitDuration, 0, 'The split duration must be greater than zero');
+
+        if (null === $this->start || null === $this->end) {
+            return [$this->duplicate()];
+        }
+
+        $offsetString = sprintf('+%s minutes', $splitDuration);
+        $splitStart = $this->start->modify($splitTime);
+        $splitEnd = $splitStart->modify($offsetString);
+
+        if (!$this->contains($splitStart) || !$this->contains($splitEnd)) {
+            return [$this->duplicate()];
+        }
+
+        return [
+            new self($this->start, $splitStart),
+            new self($splitEnd, $this->end->modify($offsetString))
+        ];
     }
 }

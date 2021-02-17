@@ -13,7 +13,9 @@ class PresenceDataTableBuilder
         array $entries,
         string $dateFormat = 'd-m-Y',
         string $timeFormat = 'H:i',
-        bool $aggregateDate = true
+        bool $aggregateDate = true,
+        string $splitTime = null,
+        int $splitDuration = 30
     ): DataTable {
 
         $periods = array_map(static function (Entry $entry) {
@@ -21,6 +23,10 @@ class PresenceDataTableBuilder
         }, $entries);
 
         $blocks = new NonOverlappingPeriodList($periods);
+
+        if ($splitTime) {
+            $blocks = $blocks->split($splitTime, $splitDuration);
+        }
 
         $headers = ['Date', 'Start', 'End', 'Duration', 'Decimal'];
         $table = new DataTable($headers);

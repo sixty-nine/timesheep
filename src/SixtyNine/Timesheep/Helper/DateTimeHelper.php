@@ -89,4 +89,11 @@ class DateTimeHelper
         }
         return new DateTimeImmutable();
     }
+
+    public static function isValidDate(string $date, string $format = 'Y-m-d'): bool
+    {
+        // https://stackoverflow.com/a/44282902/643106
+        $dateObj = DateTime::createFromFormat($format, $date);
+        return $dateObj && $dateObj->format($format) === $date;
+    }
 }

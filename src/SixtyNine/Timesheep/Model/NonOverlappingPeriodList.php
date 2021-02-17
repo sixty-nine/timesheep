@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 class NonOverlappingPeriodList
 {
-    /** @var ArrayCollection */
+    /** @var ArrayCollection<Period> */
     private $list;
 
     /**
@@ -51,6 +51,19 @@ class NonOverlappingPeriodList
         }
 
         $this->addPeriod($finalPeriod);
+    }
+
+    public function split(string $splitTime = '12:00', int $splitDuration = 30): self
+    {
+        $split = new self();
+
+        foreach ($this->list as $period) {
+            $split->addPeriods(
+                $period->split($splitTime, $splitDuration)
+            );
+        }
+
+        return $split;
     }
 
     private function findOverlappingKeys(Period $period): array
