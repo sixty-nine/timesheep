@@ -46,6 +46,12 @@ class Period
         return new self($from, $to);
     }
 
+    public static function fromDuration(DateTimeImmutable $start, int $minutes): self
+    {
+        $offsetString = sprintf('+%s minutes', $minutes);
+        return new Period($start, $start->modify($offsetString));
+    }
+
     public static function fromString(?string $start, ?string $end): Period
     {
         /** @var int $startTs */
@@ -120,6 +126,16 @@ class Period
         return $diff->h + round($diff->i / 60, 2);
     }
 
+    public function getDurationMinutes(): int
+    {
+        if (!$this->end || !$this->start) {
+            return 0;
+        }
+
+        $diff = $this->end->diff($this->start);
+        return $diff->h * 60 + $diff->i;
+    }
+
     public function getFirstDateOrToday(): DateTimeImmutable
     {
         if ($this->start) {
@@ -131,7 +147,7 @@ class Period
         return new DateTimeImmutable();
     }
 
-    public function overlaps(Period $period): bool
+    public function touches(Period $period): bool
     {
         $startsInside = $period->getStart() >= $this->getStart()
                      && $period->getStart() <= $this->getEnd();
@@ -142,9 +158,20 @@ class Period
         return $startsInside || $endsInside;
     }
 
+    public function overlaps(Period $period): bool
+    {
+        $startsInside = $period->getStart() > $this->getStart()
+                     && $period->getStart() < $this->getEnd();
+
+        $endsInside = $period->getEnd() > $this->getStart()
+            && $period->getEnd() < $this->getEnd();
+
+        return $startsInside || $endsInside;
+    }
+
     public function merge(Period $period): Period
     {
-        Assert::true($this->overlaps($period), 'Cannot merge non-overlapping periods');
+        Assert::true($this->touches($period), 'Cannot merge non-touching periods');
 
         return new Period(
             $this->start <= $period->getStart() ? $this->start : $period->getStart(),
@@ -189,5 +216,19 @@ class Period
             new self($this->start, $splitStart),
             new self($splitEnd, $this->end->modify($offsetString))
         ];
+    }
+
+    public function move(int $minutes): self
+    {
+        $offsetString = sprintf('+%s minutes', $minutes);
+        return new self(
+            $this->start->modify($offsetString),
+            $this->end->modify($offsetString)
+        );
+    }
+
+    public function moveAtEnd(Period $period): self
+    {
+        return self::fromDuration($period->getEnd(), $this->getDurationMinutes());
     }
 }

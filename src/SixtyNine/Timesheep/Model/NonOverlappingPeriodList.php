@@ -55,15 +55,20 @@ class NonOverlappingPeriodList
 
     public function split(string $splitTime = '12:00', int $splitDuration = 30): self
     {
-        $split = new self();
+        $splitPeriod = new self();
+        $lastPeriod = null;
 
+        /** @var Period $period */
         foreach ($this->list as $period) {
-            $split->addPeriods(
-                $period->split($splitTime, $splitDuration)
-            );
+            if (null !== $lastPeriod && $lastPeriod->overlaps($period)) {
+                $period = $period->moveAtEnd($lastPeriod);
+            }
+            $split = $period->split($splitTime, $splitDuration);
+            $splitPeriod->addPeriods($split);
+            $lastPeriod = end($split);
         }
 
-        return $split;
+        return $splitPeriod;
     }
 
     private function findOverlappingKeys(Period $period): array
@@ -71,7 +76,7 @@ class NonOverlappingPeriodList
         $overlappingKeys = [];
         /** @var Period $value */
         foreach ($this->list as $key => $value) {
-            if ($period->overlaps($value)) {
+            if ($period->touches($value)) {
                 $overlappingKeys[] = $key;
             }
         }
