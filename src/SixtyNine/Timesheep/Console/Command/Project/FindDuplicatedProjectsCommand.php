@@ -8,7 +8,7 @@ use SixtyNine\Timesheep\Model\DataTable\DataTable;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FindFuplicatedProjectsCommand extends TimesheepCommand
+class FindDuplicatedProjectsCommand extends TimesheepCommand
 {
     protected static $defaultName = 'proj:duplicates';
 

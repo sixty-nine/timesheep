@@ -33,7 +33,7 @@ class Application extends BaseApp
             new Command\Project\ListProjectsCommand(),
             new Command\Project\AddProjectCommand(),
             new Command\Project\RemoveProjectCommand(),
-            new Command\Project\FindFuplicatedProjectsCommand(),
+            new Command\Project\FindDuplicatedProjectsCommand(),
 
             new Command\Entry\ListEntriesCommand(),
             new Command\Entry\AddEntryCommand(),
