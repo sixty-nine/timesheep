@@ -37,9 +37,11 @@ class DateStrings
      */
     public function decimalToTime(float $decimal): string
     {
+        $hours = floor($decimal % 60);
+        $minutes = round(($decimal - (int)$decimal) * 60);
         return sprintf(
-            '%s:%02s',
-            floor($decimal % 60),
+            '%000s:%02s',
+            floor($decimal ),
             round(($decimal - (int)$decimal) * 60)
         );
     }
