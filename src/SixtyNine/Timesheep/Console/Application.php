@@ -47,6 +47,8 @@ class Application extends BaseApp
             new Command\Database\ArchiveDbCommand(),
             new Command\Database\BackupDbCommand(),
             new Command\Database\DbInfoCommand(),
+
+            new Command\CalendarCommand(),
         ]);
     }
 
