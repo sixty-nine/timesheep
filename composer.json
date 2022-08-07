@@ -13,7 +13,9 @@
         "symfony/console": "^4.3",
         "symfony/dependency-injection": "^4.3",
         "myclabs/deep-copy": "^1.9",
-        "league/flysystem": "^1.0"
+        "league/flysystem": "^1.0",
+        "symfony/cache": "^5.4",
+        "doctrine/annotations": "^1.13"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
