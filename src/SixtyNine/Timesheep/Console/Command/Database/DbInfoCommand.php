@@ -32,7 +32,7 @@ class DbInfoCommand extends TimesheepCommand
         $allEntries = $this->entriesRepo->findAll();
         /** @var Entry $firstEntry */
         $firstEntry = reset($allEntries);
-        /** @var Entry $firstEntry */
+        /** @var Entry $lastEntry */
         $lastEntry = end($allEntries);
 
         $io->title('<comment>Database file</comment>');
@@ -46,18 +46,21 @@ class DbInfoCommand extends TimesheepCommand
         $io->title('<comment>Entries</comment>');
 
         $output->write(['Entries count: <info>', count($allEntries), '</info> entries', PHP_EOL]);
-        $output->write([
-            'First entry: <info>',
-            $firstEntry->getStartFormatted($dateFormat),
-            '</info>',
-            PHP_EOL,
-        ]);
-        $output->write([
-            'Last entry: <info>',
-            $lastEntry->getStartFormatted($dateFormat),
-            '</info>',
-            PHP_EOL,
-        ]);
+
+        if (count($allEntries) > 0) {
+            $output->write([
+                'First entry: <info>',
+                $firstEntry->getStartFormatted($dateFormat),
+                '</info>',
+                PHP_EOL,
+            ]);
+            $output->write([
+                'Last entry: <info>',
+                $lastEntry->getStartFormatted($dateFormat),
+                '</info>',
+                PHP_EOL,
+            ]);
+        }
         $output->writeln('');
 
         $io->title('<comment>Projects</comment>');

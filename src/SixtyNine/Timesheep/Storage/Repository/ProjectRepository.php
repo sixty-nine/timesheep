@@ -25,7 +25,7 @@ class ProjectRepository extends EntityRepository
     {
         $proj = new Project(Project::normalizeName($name));
         $this->getEntityManager()->persist($proj);
-        $this->getEntityManager()->flush($proj);
+        $this->getEntityManager()->flush();
         return $proj;
     }
 

@@ -21,7 +21,7 @@ class BackupDbCommand extends TimesheepCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -46,5 +46,7 @@ class BackupDbCommand extends TimesheepCommand
         } else {
             $io->writeln('Database copied to ' . $outPath);
         }
+
+        return 0;
     }
 }

@@ -41,7 +41,7 @@ class DateStrings
         $minutes = round(($decimal - (int)$decimal) * 60);
         return sprintf(
             '%000s:%02s',
-            floor($decimal ),
+            floor($decimal),
             round(($decimal - (int)$decimal) * 60)
         );
     }
