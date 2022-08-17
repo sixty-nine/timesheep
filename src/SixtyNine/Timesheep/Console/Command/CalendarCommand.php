@@ -17,7 +17,7 @@ class CalendarCommand extends TimesheepCommand
     protected function configure(): void
     {
         $this
-            ->setDescription('Get information about the database.')
+            ->setDescription('Show a calendar.')
             ->addOption('from', null, InputOption::VALUE_OPTIONAL, 'Start datetime')
             ->setAliases(['cal'])
         ;

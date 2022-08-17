@@ -4,6 +4,7 @@ namespace SixtyNine\Timesheep\Console;
 
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
+use InvalidArgumentException;
 use SixtyNine\Timesheep\Config;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
@@ -35,10 +36,12 @@ abstract class TimesheepCommand extends Command implements ContainerAwareInterfa
     public function setContainer(ContainerInterface $container = null): void
     {
         if (null === $container) {
-            throw new \InvalidArgumentException('No container');
+            throw new InvalidArgumentException('No container');
         }
 
         $this->container = $container;
+
+        // Assigning to variables is required to make phpstan happy, do not refactor !!
 
         /** @var EntityManager $em */
         $em = $this->container->get('em');

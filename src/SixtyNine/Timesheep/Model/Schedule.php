@@ -21,12 +21,12 @@ class Schedule
         $this->occupationRate = $occupationRate;
     }
 
-    public function dueHoursPerWeek(int $duePerDay, float $occupation = 100): float
+    public function dueHoursPerWeek(): float
     {
         return $this->hoursPerDay * 5 * $this->occupationRate;
     }
 
-    public function dueHoursPerMonth(int $duePerDay, float $occupation = 100, DateTimeImmutable $date = null): float
+    public function dueHoursPerMonth(DateTimeImmutable $date = null): float
     {
         return $this->cal->getWorkingDays($date ?? new DateTimeImmutable())
             * $this->hoursPerDay

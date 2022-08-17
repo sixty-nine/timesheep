@@ -2,6 +2,7 @@
 
 namespace SixtyNine\Timesheep\Console\Command\Entry;
 
+use InvalidArgumentException;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Model\Calendar;
@@ -37,7 +38,6 @@ class ListEntriesCommand extends TimesheepCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cal = new Calendar();
         $schedule = new Schedule();
         $io = new MyStyle($input, $output);
 
@@ -53,7 +53,7 @@ class ListEntriesCommand extends TimesheepCommand
         $aggregateDate = !$csvOutput;
 
         if ($displayStats && $displayPresence) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The --stats and --presence switches cannot be used together'
             );
         }
@@ -81,10 +81,10 @@ class ListEntriesCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
             $io->newLine();
-            $io->writeln(sprintf('Due per week: %s', $schedule->dueHoursPerWeek(8, 0.8)));
+            $io->writeln(sprintf('Due per week: %s', $schedule->dueHoursPerWeek()));
             $io->writeln(sprintf(
                 'Due this month: %s',
-                $schedule->dueHoursPerMonth(8, 0.8, $period->getFirstDateOrToday())
+                $schedule->dueHoursPerMonth($period->getFirstDateOrToday())
             ));
         }
 
