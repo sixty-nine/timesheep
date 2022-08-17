@@ -1,6 +1,6 @@
 # TimeSheep 🐑
 
-![Run checks](https://github.com/sixty-nine/timesheep/workflows/Run%20checks/badge.svg)
+[![Run checks](https://github.com/sixty-nine/timesheep/actions/workflows/behat.yml/badge.svg)](https://github.com/sixty-nine/timesheep/actions)
 
 Simple timesheet manager.
 
