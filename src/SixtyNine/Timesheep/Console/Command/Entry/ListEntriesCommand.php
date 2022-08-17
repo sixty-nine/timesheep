@@ -82,7 +82,10 @@ class ListEntriesCommand extends TimesheepCommand
             $io->outputSummary($stats);
             $io->newLine();
             $io->writeln(sprintf('Due per week: %s', $schedule->dueHoursPerWeek(8, 0.8)));
-            $io->writeln(sprintf('Due this month: %s', $schedule->dueHoursPerMonth(8, 0.8, $period->getFirstDateOrToday())));
+            $io->writeln(sprintf(
+                'Due this month: %s',
+                $schedule->dueHoursPerMonth(8, 0.8, $period->getFirstDateOrToday())
+            ));
         }
 
         return 0;

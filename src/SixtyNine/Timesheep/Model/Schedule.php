@@ -3,7 +3,6 @@
 
 namespace SixtyNine\Timesheep\Model;
 
-
 use DateTimeImmutable;
 
 class Schedule
@@ -22,13 +21,15 @@ class Schedule
         $this->occupationRate = $occupationRate;
     }
 
-    public function dueHoursPerWeek(int $duePerDay, float $occupation = 100): int
+    public function dueHoursPerWeek(int $duePerDay, float $occupation = 100): float
     {
         return $this->hoursPerDay * 5 * $this->occupationRate;
     }
 
-    public function dueHoursPerMonth(int $duePerDay, float $occupation = 100, DateTimeImmutable $date = null): int
+    public function dueHoursPerMonth(int $duePerDay, float $occupation = 100, DateTimeImmutable $date = null): float
     {
-        return $this->cal->getWorkingDays($date ?? new DateTimeImmutable()) * $this->hoursPerDay * $this->occupationRate;
+        return $this->cal->getWorkingDays($date ?? new DateTimeImmutable())
+            * $this->hoursPerDay
+            * $this->occupationRate;
     }
 }
