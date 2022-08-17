@@ -5,6 +5,7 @@ namespace SixtyNine\Timesheep\Console\Command;
 use DateTimeImmutable;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
+use SixtyNine\Timesheep\Model\Calendar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,9 +25,10 @@ class CalendarCommand extends TimesheepCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $cal = new Calendar();
         $io = new MyStyle($input, $output);
 
-        $days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        $days = $cal->getDayNames();
 
         try {
             $start = $input->getOption('from')
@@ -61,9 +63,7 @@ class CalendarCommand extends TimesheepCommand
         // Display the month's days
         for ($i = 1; $i <= $lastDay['mday']; $i++) {
             $spacer = $i < 10 ? ' ' : '';
-            $dayOfWeek = getdate($firstDate->modify(($i - 1) . ' day')->getTimestamp())['wday'];
-            $styled = $dayOfWeek > 0 && $dayOfWeek < 6;
-
+            $styled = $cal->isWorkingDay($firstDate->modify(($i - 1) . ' day'));
 
             $io->write(sprintf('%s %s%s %s', $styled ? '<info>' : '', $spacer, $i, $styled ? '</info>' : ''));
             if ($count % 7 === 6) {

@@ -4,6 +4,7 @@ namespace SixtyNine\Timesheep\Console\Command\Entry;
 
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
+use SixtyNine\Timesheep\Model\Calendar;
 use SixtyNine\Timesheep\Model\DataTable\Builder\EntriesDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\StatsDataTableBuilder;
@@ -35,6 +36,7 @@ class ListEntriesCommand extends TimesheepCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $cal = new Calendar();
         $io = new MyStyle($input, $output);
 
         $dateFormat = $this->config->get('format.date');
@@ -76,6 +78,9 @@ class ListEntriesCommand extends TimesheepCommand
             $io->outputPeriod($period, $dateFormat);
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
+            $io->newLine();
+            $io->writeln(sprintf('Due per week: %s', $cal->dueHoursPerWeek(8, 0.8)));
+            $io->writeln(sprintf('Due this month: %s', $cal->dueHoursPerMonth(8, 0.8, $period->getFirstDateOrToday())));
         }
 
         return 0;
