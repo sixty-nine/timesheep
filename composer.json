@@ -4,7 +4,7 @@
     "type": "project",
     "license": "UNLICENSE",
     "require": {
-        "php" : "^7.1",
+        "php" : "^7.4",
         "webmozart/assert": "^1.4",
         "vlucas/phpdotenv": "^3.4",
         "monolog/monolog": "^1.24",

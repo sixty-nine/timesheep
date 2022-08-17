@@ -9,6 +9,7 @@ use SixtyNine\Timesheep\Model\DataTable\Builder\EntriesDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\StatsDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\SymfonyConsoleDataTable;
+use SixtyNine\Timesheep\Model\Schedule;
 use SixtyNine\Timesheep\Service\StatisticsService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -37,6 +38,7 @@ class ListEntriesCommand extends TimesheepCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $cal = new Calendar();
+        $schedule = new Schedule();
         $io = new MyStyle($input, $output);
 
         $dateFormat = $this->config->get('format.date');
@@ -79,8 +81,8 @@ class ListEntriesCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
             $io->newLine();
-            $io->writeln(sprintf('Due per week: %s', $cal->dueHoursPerWeek(8, 0.8)));
-            $io->writeln(sprintf('Due this month: %s', $cal->dueHoursPerMonth(8, 0.8, $period->getFirstDateOrToday())));
+            $io->writeln(sprintf('Due per week: %s', $schedule->dueHoursPerWeek(8, 0.8)));
+            $io->writeln(sprintf('Due this month: %s', $schedule->dueHoursPerMonth(8, 0.8, $period->getFirstDateOrToday())));
         }
 
         return 0;

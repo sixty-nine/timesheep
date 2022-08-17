@@ -49,14 +49,4 @@ class Calendar
 
         return $count;
     }
-
-    public function dueHoursPerWeek(int $duePerDay, float $occupation = 100): int
-    {
-        return $duePerDay * 5 * $occupation;
-    }
-
-    public function dueHoursPerMonth(int $duePerDay, float $occupation = 100, DateTimeImmutable $date = null): int
-    {
-        return $this->getWorkingDays($date ?? new DateTimeImmutable()) * $duePerDay * $occupation;
-    }
 }
