@@ -1,0 +1,9 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__DIR__).'/vendor/autoload.php';
+
+use SixtyNine\Timesheep\Setup;
+
+$setup = new Setup(dirname(__DIR__));
+$setup->check();

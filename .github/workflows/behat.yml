@@ -30,15 +30,9 @@ jobs:
         run: |
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
 
-      - name: Create .env file
+      - name: Install timesheep
         run: |
-          cp .env.example .env
-
-      - name: Create database file
-        run: |
-          mkdir database
-          touch database/database.db
-          vendor/bin/doctrine orm:schema-tool:create -q
+          bin/install
           mv database/database.db database/database.test.db
 
       - name: Execute lint

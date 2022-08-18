@@ -7,11 +7,7 @@ Simple timesheet manager.
 ## Install
 
 ```bash
-composer install
-cp .env.example .env
-mkdir database
-touch database/database.db
-vendor/bin/doctrine orm:schema-tool:create -q
+bin/install
 ```
 
 ## Usage

@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__DIR__).'/vendor/autoload.php';
+
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+use SixtyNine\Timesheep\Bootstrap;
+
+$container = Bootstrap::boostrap();
+$commands = [
+    // If you want to add your own custom console commands,
+    // you can do so here.
+];
+
+/** @var EntityManager $em */
+$em = $container->get('em');
+ConsoleRunner::run(
+    new SingleManagerProvider($em),
+    $commands
+);
