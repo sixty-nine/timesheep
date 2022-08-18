@@ -6,6 +6,7 @@ use SixtyNine\Timesheep\Model\DataTable\DataTable;
 use SixtyNine\Timesheep\Model\DateStrings;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Model\ProjectStatistics;
+use SixtyNine\Timesheep\Model\Schedule;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -75,5 +76,20 @@ class MyStyle extends SymfonyStyle
             sprintf('Decimal: <info>%sh</info>', $total),
             '',
         ]);
+    }
+
+    public function outputWeekDueStats(Schedule $schedule, ProjectStatistics $stats): void
+    {
+        $this->writeln(sprintf('  Due per week: <info>%sh</info>', $schedule->dueHoursPerWeek()));
+        $this->writeln(sprintf('Done this week: <info>%sh</info>', $stats->getTotal()));
+        $this->writeln(sprintf('    Difference: <info>%sh</info>', $schedule->dueHoursPerWeek() - $stats->getTotal()));
+    }
+
+    public function outputMonthDueStats(Schedule $schedule, ProjectStatistics $stats, Period $period): void
+    {
+        $duePerMonth = $schedule->dueHoursPerMonth($period->getFirstDateOrToday());
+        $this->writeln(sprintf(' Due this month: <info>%sh</info>', $duePerMonth));
+        $this->writeln(sprintf('Done this month: <info>%sh</info>', $stats->getTotal()));
+        $this->writeln(sprintf('     Difference: <info>%sh</info>', $duePerMonth - $stats->getTotal()));
     }
 }

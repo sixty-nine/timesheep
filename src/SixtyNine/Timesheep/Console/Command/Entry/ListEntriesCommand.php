@@ -5,7 +5,6 @@ namespace SixtyNine\Timesheep\Console\Command\Entry;
 use InvalidArgumentException;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
-use SixtyNine\Timesheep\Model\Calendar;
 use SixtyNine\Timesheep\Model\DataTable\Builder\EntriesDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\PresenceDataTableBuilder;
 use SixtyNine\Timesheep\Model\DataTable\Builder\StatsDataTableBuilder;
@@ -81,11 +80,14 @@ class ListEntriesCommand extends TimesheepCommand
             $io->outputTable($table, $this->config->get('console.box-style'));
             $io->outputSummary($stats);
             $io->newLine();
-            $io->writeln(sprintf('Due per week: %s', $schedule->dueHoursPerWeek()));
-            $io->writeln(sprintf(
-                'Due this month: %s',
-                $schedule->dueHoursPerMonth($period->getFirstDateOrToday())
-            ));
+
+            if ($input->getOption('week')) {
+                $io->outputWeekDueStats($schedule, $stats);
+            }
+
+            if ($input->getOption('month')) {
+                $io->outputMonthDueStats($schedule, $stats, $period);
+            }
         }
 
         return 0;
