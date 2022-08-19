@@ -5,6 +5,5 @@ tests/.phpunit.result.cache
 artefacts/
 database/database.db
 database/database.test.db
-.env
 dist/ts
 dist/database.db

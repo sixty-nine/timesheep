@@ -32,35 +32,31 @@ class Bootstrap
 
     /**
      * @param LoggerInterface|null $logger
-     * @param string $envFilename
+     * @param string $configFile
      * @return ContainerBuilder
      */
-    public static function boostrap(LoggerInterface $logger = null, $envFilename = '.env'): ContainerBuilder
-    {
+    public static function boostrap(
+        LoggerInterface $logger = null,
+        string $configFile = 'timesheep.yml'
+    ): ContainerBuilder {
 //        $setup = new \SixtyNine\Timesheep\Setup();
 //        $setup->check();
 
         $phar = \Phar::running();
 
         if ($phar) {
-            $envFile = $phar . '/' . $envFilename;
-            $envDir = $phar;
+            $configFile = $phar . '/' . $configFile;
         } else {
-            $envFile = self::$baseDir . $envFilename;
-            $envDir = realpath(dirname($envFile)) ?: '.';
+            $configFile = realpath(self::$baseDir) . '/' . $configFile;
         }
 
-        if (file_exists($envFile)) {
-            $dotenv = Dotenv::create($envDir, basename($envFile) ?: $envFilename);
-            $dotenv->load();
-            $dotenv->required(['TIMESHEEP_DB_URL']);
-        }
-
-        self::$config = new Config();
+        self::$config = new Config($configFile);
         self::$logger = $logger;
 
         $container = self::getContainer();
-        $container->register('config', Config::class);
+        $container
+            ->register('config', Config::class)
+            ->addArgument($configFile);
         $container
             ->register('em', EntityManager::class)
             ->setFactory([self::class, 'createEntityManager']);
@@ -121,7 +117,7 @@ class Bootstrap
         );
         $connection = DriverManager::getConnection(
             [
-                'url' => self::$config->get('db.url'),
+                'url' => self::$config->get('database_url'),
             ],
             $config
         );

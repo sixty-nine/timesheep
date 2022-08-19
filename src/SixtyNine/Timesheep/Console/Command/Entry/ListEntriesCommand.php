@@ -39,10 +39,10 @@ class ListEntriesCommand extends TimesheepCommand
     {
         $io = new MyStyle($input, $output);
 
-        $dateFormat = $this->config->get('format.date');
-        $timeFormat = $this->config->get('format.time');
-        $hoursPerDay = (int)$this->config->get('time.hours-per-day');
-        $occupationRate = (float)$this->config->get('time.occupation-rate');
+        $dateFormat = $this->config->get('date_format');
+        $timeFormat = $this->config->get('time_format');
+        $hoursPerDay = (int)$this->config->get('hours_due_per_day');
+        $occupationRate = (float)$this->config->get('occupation_rate');
 
         $schedule = new Schedule($hoursPerDay, $occupationRate);
         $statsService = new StatisticsService($this->em);
@@ -79,7 +79,7 @@ class ListEntriesCommand extends TimesheepCommand
         } else {
             $io->title('Entries');
             $io->outputPeriod($period, $dateFormat);
-            $io->outputTable($table, $this->config->get('console.box-style'));
+            $io->outputTable($table, $this->config->get('box_style'));
             $io->outputSummary($stats);
             $io->newLine();
 

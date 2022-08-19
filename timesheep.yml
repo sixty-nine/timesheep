@@ -1,0 +1,7 @@
+timesheep:
+  database_url: sqlite://./database/database.db
+  box_style: box
+  date_format: d-m-Y
+  time_format: H:i
+  hours_due_per_day: 8
+  occupation_rate: 0.8

@@ -42,8 +42,8 @@ class PresenceStatsCommand extends TimesheepCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new MyStyle($input, $output);
-        $dateFormat = $this->config->get('format.date');
-        $timeFormat = $this->config->get('format.time');
+        $dateFormat = $this->config->get('date_format');
+        $timeFormat = $this->config->get('time_format');
         $ds = new DateStrings();
 
         $statsService = new StatisticsService($this->em);
@@ -83,7 +83,7 @@ class PresenceStatsCommand extends TimesheepCommand
         } else {
             $io->title('Presence stats');
             $io->outputPeriod($period, $dateFormat);
-            $io->outputTable($table, $this->config->get('console.box-style'));
+            $io->outputTable($table, $this->config->get('box_style'));
             $io->outputSummary($stats);
         }
 

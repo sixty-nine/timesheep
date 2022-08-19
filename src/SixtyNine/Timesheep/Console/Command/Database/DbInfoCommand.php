@@ -20,7 +20,7 @@ class DbInfoCommand extends TimesheepCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $dateFormat = $this->config->get('format.date');
+        $dateFormat = $this->config->get('date_format');
 
         $io = new MyStyle($input, $output);
 

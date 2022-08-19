@@ -30,7 +30,7 @@ class AddEntryCommand extends TimesheepCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
-        $format = $this->config->get('format.datetime');
+        $format = $this->config->get('datetime_format');
 
         /** @var string $force */
         $force = $input->getOption('force');

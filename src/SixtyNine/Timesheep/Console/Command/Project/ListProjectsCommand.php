@@ -26,7 +26,7 @@ class ListProjectsCommand extends TimesheepCommand
 
         $projects = $this->projectRepo->findAll();
         $repo = $this->entriesRepo;
-        $format = $this->config->get('format.date');
+        $format = $this->config->get('date_format');
 
         // Add last usage to every project
         $projects = array_map(static function (array $p) use ($repo, $format) {
@@ -39,7 +39,7 @@ class ListProjectsCommand extends TimesheepCommand
         $headers = ['ID', 'Name', 'Description', 'Last usage'];
         $table = new DataTable($headers, $projects);
 
-        $io->outputTable($table, $this->config->get('console.box-style'));
+        $io->outputTable($table, $this->config->get('box_style'));
 
         return 0;
     }

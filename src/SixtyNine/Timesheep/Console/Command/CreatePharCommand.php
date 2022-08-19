@@ -62,10 +62,13 @@ class CreatePharCommand extends Command
             $fs->copy($rootDir.'/composer.lock', $tempDir.'/composer.lock');
             $fs->copy($rootDir.'/bin/doctrine', $tempDir.'/bin/doctrine');
             $fs->copy($rootDir.'/database/database.empty.db', $tempDir.'/database.db');
-            chmod($tempDir.'/bin/doctrine', 0555);
-            $fs->write($tempDir.'/.env', "TIMESHEEP_DB_URL=sqlite://./database.db\n");
-            // TODO: other .env options
+            $fs->copy($rootDir.'/timesheep.yml', $tempDir.'/timesheep.yml');
+            $this->runOrFail(
+                ['sed', '-i', 's/database\/database.db/database.db/g', 'timesheep.yml'],
+                $tempDir
+            );
             $fs->copy($rootDir.'/bin/ts', $tempDir.'/bin/ts');
+            chmod($tempDir.'/bin/doctrine', 0555);
             chmod($tempDir.'/bin/ts', 0555);
 
             $io->writeln('');

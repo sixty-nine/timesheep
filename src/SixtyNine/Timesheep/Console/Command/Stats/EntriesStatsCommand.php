@@ -33,8 +33,8 @@ class EntriesStatsCommand extends TimesheepCommand
     {
         $io = new MyStyle($input, $output);
 
-        $dateFormat = $this->config->get('format.date');
-        $timeFormat = $this->config->get('format.time');
+        $dateFormat = $this->config->get('date_format');
+        $timeFormat = $this->config->get('time_format');
 
         $statsService = new StatisticsService($this->em);
 
@@ -51,7 +51,7 @@ class EntriesStatsCommand extends TimesheepCommand
         } else {
             $io->title('Entries');
             $io->outputPeriod($period, $dateFormat);
-            $io->outputTable($table, $this->config->get('console.box-style'));
+            $io->outputTable($table, $this->config->get('box_style'));
             $io->outputSummary($stats);
         }
 

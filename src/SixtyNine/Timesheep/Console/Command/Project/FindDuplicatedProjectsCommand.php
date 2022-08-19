@@ -37,7 +37,7 @@ class FindDuplicatedProjectsCommand extends TimesheepCommand
             ]);
         }
 
-        $io->outputTable($table, $this->config->get('console.box-style'));
+        $io->outputTable($table, $this->config->get('box_style'));
         $output->writeln('');
 
         return 0;
