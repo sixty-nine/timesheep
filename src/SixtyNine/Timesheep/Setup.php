@@ -5,6 +5,8 @@ namespace SixtyNine\Timesheep;
 use InvalidArgumentException;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
+use SixtyNine\Timesheep\Console\Style\MyStyle;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -16,8 +18,8 @@ class Setup
     private $directory;
     /** @var Filesystem */
     private $fs;
-    /** @var ConsoleOutput */
-    private $output;
+    /** @var MyStyle */
+    private $io;
 
 
     public function __construct(string $directory)
@@ -28,7 +30,7 @@ class Setup
 
         $this->directory = $directory;
         $this->fs = new Filesystem(new Local($directory));
-        $this->output = new ConsoleOutput();
+        $this->io = new MyStyle(new StringInput(''), new ConsoleOutput());
     }
 
     public function isInstalled(): bool
@@ -39,11 +41,11 @@ class Setup
     public function check(): void
     {
         if ($this->isInstalled()) {
-            $this->output->writeln('<question>Timesheep is already installed</question>');
+            $this->io->writeln('<question>Timesheep is already installed</question>');
             die;
         }
 
-        $this->output->writeln('Timesheep is not installed, installing...');
+        $this->io->writeln('Timesheep is not installed, installing...');
         Assert::true(
             is_writable($this->directory),
             sprintf('<error>The directory "%s" is not writable</error>', $this->directory)
@@ -55,14 +57,16 @@ class Setup
     protected function install(): void
     {
         if (!$this->fs->has('/.env')) {
-            $this->output->writeln('Creating <info>config</info>');
+            $this->io->writeln('<info>Creating config</info>');
             $config = "TIMESHEEP_DB_URL=sqlite://./database/database.db\n";
             $config .= "BOX_STYLE=box\n";
             $this->fs->write('/.env', $config);
+        } else {
+            $this->io->writeln('<info>Config already exists</info>');
         }
 
         if (!$this->fs->has('/database/database.db')) {
-            $this->output->writeln('Creating <info>database.db</info>');
+            $this->io->writeln('<info>Creating database</info>');
 
             try {
                 if (!$this->fs->has('database')) {
@@ -72,8 +76,8 @@ class Setup
                 $process = Process::fromShellCommandline("touch $dbFile");
                 $process->mustRun();
             } catch (ProcessFailedException $ex) {
-                $this->output->writeln(sprintf('<error>Cannot create the database file: %s</error>', $dbFile));
-                $this->output->writeln($ex->getMessage());
+                $this->io->writeln(sprintf('<error>Cannot create the database file: %s</error>', $dbFile));
+                $this->io->writeln($ex->getMessage());
                 die;
             }
 
@@ -81,9 +85,11 @@ class Setup
                 $process = Process::fromShellCommandline('bin/doctrine orm:schema-tool:create -q');
                 $process->mustRun();
             } catch (ProcessFailedException $ex) {
-                $this->output->writeln('Doctrine error: Cannot install the database');
+                $this->io->writeln('Doctrine error: Cannot install the database');
                 die;
             }
+        } else {
+            $this->io->writeln('<info>Database already created</info>');
         }
     }
 }

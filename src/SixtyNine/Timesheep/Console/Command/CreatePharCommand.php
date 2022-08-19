@@ -9,6 +9,7 @@ use Phar;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
+use SixtyNine\Timesheep\Console\Style\MyStyle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -19,8 +20,8 @@ class CreatePharCommand extends Command
 {
     protected static $defaultName = 'create-phar';
 
-    /** @var OutputInterface */
-    private $output;
+    /** @var MyStyle */
+    private $io;
 
     protected function configure(): void
     {
@@ -29,9 +30,10 @@ class CreatePharCommand extends Command
             ->addOption('debug', null, InputOption::VALUE_NONE, 'If set, the temporary dir is not removed');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $io): int
     {
-        $this->output = $output;
+        $io = new MyStyle($input, $io);
+        $this->io = $io;
 
         $rootDir = dirname(__DIR__, 5);
         $tempDir = sys_get_temp_dir().'/ts-phar';
@@ -40,18 +42,19 @@ class CreatePharCommand extends Command
         $outDir = dirname($outFile);
         $fs = new Filesystem(new Local('/'));
 
-        $output->writeln('');
-        $output->writeln("Root dir: <info>{$rootDir}</info>");
-        $output->writeln("Temp dir: <info>{$tempDir}</info>");
-        $output->writeln("Output PHAR: <info>{$outFile}</info>");
-        $output->writeln('');
+        $io->title('Summary');
+        $io->writeln("Root dir: <info>{$rootDir}</info>");
+        $io->writeln("Temp dir: <info>{$tempDir}</info>");
+        $io->writeln("Output PHAR: <info>{$outFile}</info>");
+        $io->writeln('');
 
         try {
-            $output->writeln('<question>Create temporary dir</question>');
+            $io->title('Execution');
+            $io->writeln('<info>Create temporary dir</info>');
             $this->runOrFail(['mkdir', '-p', $tempDir], null, 'Failed creating: '.$tempDir);
 
-            $output->writeln('');
-            $output->writeln('<question>Copy files</question>');
+            $io->writeln('');
+            $io->writeln('<info>Copy files</info>');
             $fs->createDir($tempDir.'/bin');
             $fs->copy($rootDir.'/composer.json', $tempDir.'/composer.json');
             $fs->copy($rootDir.'/composer.lock', $tempDir.'/composer.lock');
@@ -63,18 +66,18 @@ class CreatePharCommand extends Command
             $fs->copy($rootDir.'/bin/ts', $tempDir.'/bin/ts');
             chmod($tempDir.'/bin/ts', 0555);
 
-            $output->writeln('');
-            $output->writeln('<question>Copy source</question>');
+            $io->writeln('');
+            $io->writeln('<info>Copy source</info>');
             $this->runOrFail(['cp', '-R', $rootDir.'/src/', $tempDir.'/src']);
 
             chdir($tempDir);
 
-            $output->writeln('');
-            $output->writeln('<question>Run composer</question>');
+            $io->writeln('');
+            $io->writeln('<info>Run composer</info>');
             $this->runOrFail(['composer', 'install', '--no-dev']);
 
-            $output->writeln('');
-            $output->writeln('<question>Build PHAR</question>');
+            $io->writeln('');
+            $io->writeln('<info>Build PHAR</info>');
             $p = new Phar($pharFile);
             $p->startBuffering();
             $it = new RecursiveDirectoryIterator($tempDir);
@@ -86,8 +89,8 @@ class CreatePharCommand extends Command
             $p->stopBuffering();
             //$p->compress(Phar::GZ);
 
-            $output->writeln('');
-            $output->writeln('<question>Create '.$outFile.'</question>');
+            $io->writeln('');
+            $io->writeln('<info>Create '.$outFile.'</info>');
             if ($fs->has($outDir.'/ts')) {
                 $fs->delete($outDir.'/ts');
             }
@@ -98,29 +101,29 @@ class CreatePharCommand extends Command
             $fs->copy($tempDir.'/ts.phar', $outFile);
             chmod($outFile, 0555);
         } catch (\Exception $ex) {
-            $output->writeln('<error>'.trim($ex->getMessage()).'</error>');
+            $io->writeln('<error>'.trim($ex->getMessage()).'</error>');
         } finally {
             if (!$input->getOption('debug')) {
-                $output->writeln('');
-                $output->writeln('<question>Remove temporary dir</question>');
+                $io->writeln('');
+                $io->writeln('<info>Remove temporary dir</info>');
                 $process = new Process(['rm', '-rf', $tempDir]);
                 $process->run();
 
                 if (!$process->isSuccessful()) {
-                    $output->writeln('<error>ERR: Cannot remove temp dir: '.$tempDir.'</error>');
+                    $io->writeln('<error>ERR: Cannot remove temp dir: '.$tempDir.'</error>');
                 }
             }
         }
 
-        $output->writeln(PHP_EOL.'Done');
+        $io->writeln(PHP_EOL.'Done');
 
         return 0;
     }
 
     private function runOrFail(array $commands, string $cwd = null, string $errorMsg = null): void
     {
-        $this->output->writeln(sprintf(
-            '> <info>%s</info>',
+        $this->io->writeln(sprintf(
+            '<comment>></comment> %s',
             implode(' ', $commands)
         ));
         $process = new Process($commands, $cwd);
