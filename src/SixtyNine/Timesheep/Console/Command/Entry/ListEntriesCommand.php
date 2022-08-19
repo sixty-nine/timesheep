@@ -37,12 +37,14 @@ class ListEntriesCommand extends TimesheepCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $schedule = new Schedule();
         $io = new MyStyle($input, $output);
 
         $dateFormat = $this->config->get('format.date');
         $timeFormat = $this->config->get('format.time');
+        $hoursPerDay = (int)$this->config->get('time.hours-per-day');
+        $occupationRate = (float)$this->config->get('time.occupation-rate');
 
+        $schedule = new Schedule($hoursPerDay, $occupationRate);
         $statsService = new StatisticsService($this->em);
 
         // --- Process parameters

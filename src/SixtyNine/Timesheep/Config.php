@@ -25,6 +25,8 @@ class Config
             ],
             'time' => [
                 'rounding' => getenv('TIME_ROUNDING') ?: '5',
+                'hours-per-day' => getenv('HOURS_DUE_PER_DAY'),
+                'occupation-rate' => getenv('OCCUPATION_RATE'),
             ],
             'format' => [
                 'date' => $dateFormat ?: 'd-m-Y',
