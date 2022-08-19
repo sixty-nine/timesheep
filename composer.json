@@ -38,8 +38,7 @@
         "test": "vendor/bin/phpunit -c tests --colors=always",
         "test:unit": "vendor/bin/phpunit -c tests --testsuite Unit --colors=always",
         "test:debug": "vendor/bin/phpunit -c tests --colors=always --stop-on-error --stop-on-failure",
-        "test:coverage": "/bin/sh build/generate-coverage.sh",
-        "phar:build": "COMPOSER_DISABLE_XDEBUG_WARN=1 php -dphar.readonly=0 build/create-phar.php"
+        "test:coverage": "/bin/sh build/generate-coverage.sh"
     },
     "config": {
         "allow-plugins": {
