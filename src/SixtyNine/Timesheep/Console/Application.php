@@ -2,6 +2,7 @@
 
 namespace SixtyNine\Timesheep\Console;
 
+use Phar;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -50,6 +51,12 @@ class Application extends BaseApp
 
             new Command\CalendarCommand(),
         ]);
+
+        if (Phar::running() === '') {
+            $this->addCommands([
+                new Command\CreatePharCommand(),
+            ]);
+        }
     }
 
     /**

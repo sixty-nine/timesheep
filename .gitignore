@@ -3,6 +3,8 @@ vendor/
 tests/phpunit.xml
 tests/.phpunit.result.cache
 artefacts/
-database/
+database/database.db
+database/database.test.db
 .env
-dist/
+dist/ts
+dist/database.db
