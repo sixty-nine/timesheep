@@ -51,6 +51,8 @@ class CreatePharCommand extends Command
         try {
             $io->title('Execution');
             $io->writeln('<info>Create temporary dir</info>');
+            $process = new Process(['rm', '-rf', $tempDir]);
+            $process->run();
             $this->runOrFail(['mkdir', '-p', $tempDir], null, 'Failed creating: '.$tempDir);
 
             $io->writeln('');
