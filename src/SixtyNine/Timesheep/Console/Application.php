@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Application extends BaseApp
 {
+    const VERSION = '1.0.0-rc1';
     const LOGO = "\xF0\x9F\x90\x91";
     /** @var ContainerInterface */
     private $container;
@@ -24,7 +25,7 @@ class Application extends BaseApp
 
     public function __construct(ContainerInterface $container, LoggerInterface $logger = null)
     {
-        parent::__construct('TimeSheep '.self::LOGO, '0.0.0');
+        parent::__construct('TimeSheep '.self::LOGO, self::VERSION);
         $this->logger = $logger ?: new NullLogger();
         $this->container = $container;
 
