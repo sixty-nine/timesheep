@@ -5,6 +5,7 @@ namespace SixtyNine\Timesheep\Storage\Repository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use InvalidArgumentException;
 use \RuntimeException;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
@@ -31,7 +32,7 @@ class EntryRepository extends EntityRepository
     ): Entry {
         $crossingEntries = $this->findCrossingEntries($period);
         if (0 < count($crossingEntries)) {
-            throw new \InvalidArgumentException('Overlapping entry');
+            throw new InvalidArgumentException('Overlapping entry');
         }
 
         /** @var DateTimeImmutable $start */
@@ -47,6 +48,47 @@ class EntryRepository extends EntityRepository
         }
 
         $entry = new Entry();
+        $entry
+            ->setStart($start)
+            ->setEnd($period->getEnd())
+            ->setProject(Project::normalizeName($project))
+            ->setTask($task)
+            ->setDescription($description)
+        ;
+        $this->_em->persist($entry);
+        $this->_em->flush();
+
+        return $entry;
+    }
+
+    public function editEntry(
+        int $id,
+        Period $period,
+        string $project = '',
+        string $task = '',
+        string $description = ''
+    ): Entry {
+        $crossingEntry = $this->checkNoCrossingEntries($period);
+        if (!is_bool($crossingEntry) && $crossingEntry->getId() !== $id) {
+            throw new InvalidArgumentException('Overlapping entry');
+        }
+
+        /** @var DateTimeImmutable $start */
+        $start = $period->getStart();
+        Assert::notNull($start, 'An entry must have a start date');
+
+        if ($project) {
+            /** @var ProjectRepository $projRepo */
+            $projRepo = $this->_em->getRepository(Project::class);
+            if (!$projRepo->exists($project)) {
+                $projRepo->create($project);
+            }
+        }
+
+        /** @var Entry $entry */
+        $entry = $this->find($id);
+        Assert::notNull($entry, 'Cannot find entry ID ' . $id);
+
         $entry
             ->setStart($start)
             ->setEnd($period->getEnd())
