@@ -10,13 +10,13 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
-use Symfony\Component\Console\Command\Command;
+use SixtyNine\Timesheep\Console\TimesheepCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
-class CreatePharCommand extends Command
+class CreatePharCommand extends TimesheepCommand
 {
     protected static $defaultName = 'create-phar';
 
@@ -105,7 +105,7 @@ class CreatePharCommand extends Command
             $fs->copy($tempDir.'/database.db', $outDir.'/database.db');
             $fs->copy($tempDir.'/ts.phar', $outFile);
             chmod($outFile, 0555);
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $io->writeln('<error>'.trim($ex->getMessage()).'</error>');
         } finally {
             if (!$input->getOption('debug')) {

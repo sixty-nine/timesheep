@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Dotenv\Dotenv;
+use Exception;
+use Phar;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -42,7 +44,7 @@ class Bootstrap
 //        $setup = new \SixtyNine\Timesheep\Setup();
 //        $setup->check();
 
-        $phar = \Phar::running();
+        $phar = Phar::running();
 
         if ($phar) {
             $configFile = $phar . '/' . $configFile;
@@ -78,7 +80,7 @@ class Bootstrap
 
     /**
      * @return Config
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getConfig(): Config
     {
@@ -89,7 +91,7 @@ class Bootstrap
 
     /**
      * @return EntityManager
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getEntityManager(): EntityManager
     {

@@ -2,6 +2,7 @@
 
 namespace SixtyNine\Timesheep\Console\Command\Database;
 
+use InvalidArgumentException;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,11 +32,11 @@ class BackupDbCommand extends TimesheepCommand
         $path = $dbParams['path'];
 
         if (!file_exists($path)) {
-            throw new \InvalidArgumentException('Cannot find DB file: ' . $path);
+            throw new InvalidArgumentException('Cannot find DB file: ' . $path);
         }
 
         if (file_exists($outPath) && !is_writable($outPath)) {
-            throw new \InvalidArgumentException('The output file is not writable: ' . $outPath);
+            throw new InvalidArgumentException('The output file is not writable: ' . $outPath);
         }
 
         $process = new Process(['cp', $path, $outPath]);

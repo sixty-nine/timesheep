@@ -4,6 +4,8 @@ namespace SixtyNine\Timesheep\Model;
 
 use DateTimeImmutable;
 use DateTimeInterface;
+use Exception;
+use InvalidArgumentException;
 use Webmozart\Assert\Assert;
 
 class Period
@@ -193,7 +195,7 @@ class Period
      * @param string $splitTime
      * @param int $splitDuration
      * @return array<Period>
-     * @throws \Exception
+     * @throws Exception
      */
     public function split(string $splitTime = '12:00', int $splitDuration = 30): array
     {
@@ -230,7 +232,7 @@ class Period
     public function moveAtEnd(Period $period): self
     {
         if (null === $period->getEnd()) {
-            throw  new \InvalidArgumentException('Cannot move at the end');
+            throw  new InvalidArgumentException('Cannot move at the end');
         }
 
         return self::fromDuration($period->getEnd(), $this->getDurationMinutes());

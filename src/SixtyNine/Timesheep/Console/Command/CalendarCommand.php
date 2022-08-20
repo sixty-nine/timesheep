@@ -3,6 +3,7 @@
 namespace SixtyNine\Timesheep\Console\Command;
 
 use DateTimeImmutable;
+use Exception;
 use SixtyNine\Timesheep\Console\Style\MyStyle;
 use SixtyNine\Timesheep\Console\TimesheepCommand;
 use SixtyNine\Timesheep\Model\Calendar;
@@ -35,7 +36,7 @@ class CalendarCommand extends TimesheepCommand
                 ? new DateTimeImmutable($input->getOption('from'))
                 : new DateTimeImmutable()
             ;
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $io->writeln(sprintf('<error>Invalid start date: %s</error>', $input->getOption('from')));
             return 1;
         }
