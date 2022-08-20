@@ -41,13 +41,13 @@ class DeleteEntryCommand extends TimesheepCommand
         if (count($entries) === 0) {
             $io->writeln('<question>No entries found for this date</question>');
             $io->newLine();
-            return 0;
+            return 1;
         }
 
         if (count($entries) > 1) {
             $io->error('Multiple entries found for this date');
             $io->newLine();
-            return 0;
+            return 1;
         }
 
         /** @var Entry $entry */

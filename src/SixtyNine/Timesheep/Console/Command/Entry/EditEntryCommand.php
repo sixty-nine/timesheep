@@ -53,13 +53,13 @@ class EditEntryCommand extends TimesheepCommand
         if (count($entries) === 0) {
             $io->writeln('<question>No entries found for this date</question>');
             $io->newLine();
-            return 0;
+            return 1;
         }
 
         if (count($entries) > 1) {
             $io->error('Multiple entries found for this date');
             $io->newLine();
-            return 0;
+            return 1;
         }
 
         /** @var Entry $entry */
@@ -93,7 +93,7 @@ class EditEntryCommand extends TimesheepCommand
             $task = $io->ask('Description');
         }
 
-        $project = Project::normalizeName($project);
+        $project = Project::normalizeName($project ?? '');
         $period = Period::fromString($start, $end);
 
         $io->writeln('<comment>Original:</comment>');
@@ -125,7 +125,7 @@ class EditEntryCommand extends TimesheepCommand
             return 1;
         }
 
-        if (!$io->confirm('Do you want to edit the entry?', false)) {
+        if (!$force && !$io->confirm('Do you want to edit the entry?', false)) {
             $io->error('Aborted.');
             return 1;
         }
