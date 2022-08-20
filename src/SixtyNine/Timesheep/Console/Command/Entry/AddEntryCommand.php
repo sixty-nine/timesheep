@@ -23,13 +23,12 @@ class AddEntryCommand extends TimesheepCommand
             ->addArgument('project', InputArgument::OPTIONAL, 'Project code.')
             ->addArgument('task', InputArgument::OPTIONAL, 'Task, i.e. JIRA ticket or such.')
             ->addArgument('description', InputArgument::OPTIONAL, 'Optional description')
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force the removal.')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force the creation.')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-
         $format = $this->config->get('datetime_format');
 
         /** @var string $force */

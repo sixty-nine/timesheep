@@ -5,6 +5,7 @@ namespace SixtyNine\Timesheep\Storage\Repository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use \RuntimeException;
 use SixtyNine\Timesheep\Model\Period;
 use SixtyNine\Timesheep\Storage\Entity\Entry;
 use SixtyNine\Timesheep\Storage\Entity\Project;
@@ -57,6 +58,18 @@ class EntryRepository extends EntityRepository
         $this->_em->flush();
 
         return $entry;
+    }
+
+    public function deleteEntry(int $id): void
+    {
+        $entry = $this->find($id);
+
+        if (!$entry) {
+            throw new RuntimeException('No entry found for id ' . $id);
+        }
+
+        $this->_em->remove($entry);
+        $this->_em->flush();
     }
 
     public function findEntry(Period $period, string $project = null): object
