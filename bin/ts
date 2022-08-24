@@ -3,11 +3,8 @@
 
 require_once dirname(__DIR__).'/vendor/autoload.php';
 
-use SixtyNine\Timesheep\Bootstrap;
 use SixtyNine\Timesheep\Console\Application;
 
-$container = Bootstrap::boostrap();
-
-$application = new Application($container);
+$application = new Application();
 $application->run();
 

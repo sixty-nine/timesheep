@@ -2,7 +2,10 @@
 
 use Behat\Gherkin\Node\TableNode;
 use SixtyNine\Timesheep\Console\Application;
+use SixtyNine\Timesheep\Helper\Objects;
+use Symfony\Component\Console\Command\Command as BaseCommand;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Webmozart\Assert\Assert;
 
 trait RunningCommandsTrait
@@ -58,8 +61,12 @@ trait RunningCommandsTrait
 
     protected function callCommandWith(string $name, array $args = []): CommandTester
     {
-        $app = new Application($this->container);
+        $app = new Application();
         $command = $app->find($name);
+        if (Objects::implements($command, ContainerAwareInterface::class)) {
+            /** @var BaseCommand & ContainerAwareInterface $command */
+            $command->setContainer($this->container);
+        }
         $commandTester = new CommandTester($command);
         $commandTester->execute(array_merge(['command' => $name], $args));
         $this->lastCommandStatus = $commandTester->getStatusCode();

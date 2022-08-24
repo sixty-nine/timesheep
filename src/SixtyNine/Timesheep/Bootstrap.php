@@ -44,14 +44,6 @@ class Bootstrap
 //        $setup = new \SixtyNine\Timesheep\Setup();
 //        $setup->check();
 
-        $phar = Phar::running();
-
-        if ($phar) {
-            $configFile = $phar . '/' . $configFile;
-        } else {
-            $configFile = realpath(self::$baseDir) . '/' . $configFile;
-        }
-
         self::$config = new Config($configFile);
         self::$logger = $logger;
 
