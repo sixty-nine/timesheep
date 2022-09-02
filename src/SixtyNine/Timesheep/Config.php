@@ -14,9 +14,14 @@ class Config
 
     public function __construct(string $configFile)
     {
-        if (!file_exists($configFile)) {
-            die(sprintf("Config file not found: %s\n", $configFile));
+        $isConfigFile = file_exists($configFile) &&
+            is_writable($configFile) &&
+            !is_dir($configFile);
+
+        if (!$isConfigFile) {
+            die(sprintf("Invalid config file: %s\n", $configFile));
         }
+
         /** @var string $content */
         $content = file_get_contents($configFile);
         $config = Yaml::parse($content);

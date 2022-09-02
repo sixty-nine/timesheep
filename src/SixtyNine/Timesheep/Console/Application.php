@@ -76,7 +76,11 @@ class Application extends BaseApp
             $configFile = $input->getOption('config');
         }
 
-        if (!file_exists($configFile)) {
+        $isConfigFile = file_exists($configFile) &&
+            is_writable($configFile) &&
+            !is_dir($configFile);
+
+        if (!$isConfigFile) {
             throw new RuntimeException('Config file not found: ' . $configFile);
         }
         $container = Bootstrap::boostrap($this->logger, $configFile);
