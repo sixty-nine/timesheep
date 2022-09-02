@@ -31,7 +31,11 @@ class Config
             new TimesheepConfiguration(),
             $config
         );
-        $this->config['datetime_format'] = $this->config['date_format'] . ' ' . $this->config['time_format'];
+
+        $this->config += [
+            'config_file' => realpath($configFile),
+            'datetime_format' => $this->config['date_format'] . ' ' . $this->config['time_format'],
+        ];
     }
 
     public function get(string $key): string

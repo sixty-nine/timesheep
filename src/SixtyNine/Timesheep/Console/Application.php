@@ -20,7 +20,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Application extends BaseApp
 {
@@ -56,6 +55,7 @@ class Application extends BaseApp
             new Command\Database\DbInfoCommand(),
 
             new Command\CalendarCommand(),
+            new Command\ConfigureCommand(),
         ]);
 
         if (Phar::running() === '') {
