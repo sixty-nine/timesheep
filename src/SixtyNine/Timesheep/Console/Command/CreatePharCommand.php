@@ -92,7 +92,7 @@ class CreatePharCommand extends TimesheepCommand
             $stub = "#!/usr/bin/env php\n".$defaultStub;
             $p->setStub($stub);
             $p->stopBuffering();
-            //$p->compress(Phar::GZ);
+            //$p->compressFiles(Phar::GZ); // FIXME: does not work because of file paths in the Phar.
 
             $io->writeln('');
             $io->writeln('<info>Create '.$outFile.'</info>');
