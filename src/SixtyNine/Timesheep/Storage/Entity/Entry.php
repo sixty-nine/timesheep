@@ -80,8 +80,12 @@ class Entry
      * @param DateTimeImmutable $start
      * @return Entry
      */
-    public function setStart(DateTimeImmutable $start): Entry
+    public function setStart(?DateTimeImmutable $start): Entry
     {
+        if (null === $start) {
+            throw new \InvalidArgumentException('Start cannot be null');
+        }
+
         $this->start = $start;
         return $this;
     }

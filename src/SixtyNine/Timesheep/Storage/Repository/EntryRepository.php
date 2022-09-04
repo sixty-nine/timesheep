@@ -24,6 +24,12 @@ class EntryRepository extends EntityRepository
         return $qb->getQuery()->execute();
     }
 
+    public function saveEntry(Entry $entry): void
+    {
+        $this->_em->persist($entry);
+        $this->_em->flush();
+    }
+
     public function create(
         Period $period,
         string $project = '',
@@ -45,6 +51,34 @@ class EntryRepository extends EntityRepository
             if (!$projRepo->exists($project)) {
                 $projRepo->create($project);
             }
+        }
+
+        // Create entry or merge it with adjacent similar entries.
+
+        $entryBefore = null;
+        $entryAfter = null;
+
+        if (null !== $period->getStart()) {
+            $entryBefore = $this->findEntryEndingAt($period->getStart(), $project, $task);
+        }
+
+        if (null !== $period->getEnd()) {
+            $entryAfter = $this->findEntryStartingAt($period->getEnd(), $project, $task);
+        }
+
+        if ($entryBefore && $entryAfter) {
+            $entryBefore->setEnd($entryAfter->getEnd());
+            $this->deleteEntry($entryAfter->getId());
+            $this->saveEntry($entryBefore);
+            return $entryBefore;
+        } elseif ($entryBefore) {
+            $entryBefore->setEnd($period->getEnd());
+            $this->saveEntry($entryBefore);
+            return $entryBefore;
+        } elseif ($entryAfter) {
+            $entryAfter->setStart($period->getStart());
+            $this->saveEntry($entryAfter);
+            return $entryAfter;
         }
 
         $entry = new Entry();
@@ -114,7 +148,7 @@ class EntryRepository extends EntityRepository
         $this->_em->flush();
     }
 
-    public function findEntry(Period $period, string $project = null): object
+    public function findEntry(Period $period, string $project = null): ?Entry
     {
         $qb = $this
             ->createQueryBuilder('e')
@@ -136,8 +170,12 @@ class EntryRepository extends EntityRepository
         ;
     }
 
-    public function findEntryStartingAt(DateTimeImmutable $start, string $project = null): array
+    public function findEntryStartingAt(?DateTimeImmutable $start, string $project = null, string $task = null): ?Entry
     {
+        if (null === $start) {
+            return null;
+        }
+
         $qb = $this
             ->createQueryBuilder('e')
             ->andWhere('e.start = :start')
@@ -148,6 +186,45 @@ class EntryRepository extends EntityRepository
             $qb
                 ->andWhere('e.project = :project')
                 ->setParameter('project', $project)
+            ;
+        }
+
+        if ($task) {
+            $qb
+                ->andWhere('e.task = :task')
+                ->setParameter('task', $task)
+            ;
+        }
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function findEntryEndingAt(?DateTimeImmutable $end, string $project = null, string $task = null): ?Entry
+    {
+        if (null === $end) {
+            return null;
+        }
+
+        $qb = $this
+            ->createQueryBuilder('e')
+            ->andWhere('e.end = :start')
+            ->setParameter('start', $end)
+        ;
+
+        if ($project) {
+            $qb
+                ->andWhere('e.project = :project')
+                ->setParameter('project', $project)
+            ;
+        }
+
+        if ($task) {
+            $qb
+                ->andWhere('e.task = :task')
+                ->setParameter('task', $task)
             ;
         }
 

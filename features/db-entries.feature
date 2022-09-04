@@ -17,9 +17,9 @@ Feature: Creation of db entries
           And I should not be able to create an entry from 9:00 to 12:00
           And I should be able to create an entry from 09:00 to 10:00
 
-         Then I should have a new entry from 09:00 to 10:00
-          And I should have 2 entries
+         Then I should have a new entry from 09:00 to 15:00
+          And I should have 1 entries
           And I should not be able to create an entry from 7:00 to 10:00
           And I should be able to create an entry from 7:00 to 9:00
-          And I should have 3 entries
+          And I should have 1 entries
 

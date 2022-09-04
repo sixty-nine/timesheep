@@ -78,6 +78,7 @@ class AddEntryCommand extends TimesheepCommand
         }
 
         $this->entriesRepo->create($period, $project ?? '', $task ?? '', $description ?? '');
+
         $io->writeln('Entry created');
 
         return 0;
