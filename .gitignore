@@ -7,3 +7,5 @@ database/database.db
 database/database.test.db
 dist/ts
 dist/database.db
+dist/timesheep.yml
+

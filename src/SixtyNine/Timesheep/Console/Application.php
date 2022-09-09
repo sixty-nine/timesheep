@@ -70,7 +70,12 @@ class Application extends BaseApp
         $input = $input ?? new ArgvInput();
         $output = $output ?? new ConsoleOutput();
 
-        $configFile = dirname(__DIR__, 4) . '/timesheep.yml';
+        if (Phar::running()) {
+            $configFile = dirname(__DIR__, 5) . '/timesheep.yml';
+            $configFile = str_replace('phar://', '', $configFile);
+        } else {
+            $configFile = dirname(__DIR__, 4) . '/timesheep.yml';
+        }
 
         if ($input->getOption('config')) {
             $configFile = $input->getOption('config');
@@ -83,6 +88,7 @@ class Application extends BaseApp
         if (!$isConfigFile) {
             throw new RuntimeException('Config file not found: ' . $configFile);
         }
+
         $container = Bootstrap::boostrap($this->logger, $configFile);
 
         if (Objects::implements($command, ContainerAwareInterface::class)) {
