@@ -15,7 +15,7 @@
 
     <testsuites>
         <testsuite name="Timesheep Test Suite">
-            <directory suffix="Test.php">./src/*/</directory>
+            <directory suffix="Test.php">../src/**/</directory>
         </testsuite>
     </testsuites>
 

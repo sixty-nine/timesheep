@@ -4,12 +4,20 @@ namespace SixtyNine\Timesheep\Helper;
 
 class Numbers
 {
-    // From https://gist.github.com/liunian/9338301#gistcomment-1570375
+    /**
+     * @var string[]
+     */
+    private static $units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
     public static function humanFileSize(int $size, int $precision = 2): string
     {
-        for ($i = 0; ($size / 1024) > 0.9; $i++, $size /= 1024) {
-            // do nothing
+        $i = (int)log($size, 1024);
+
+        $rounded = round($size / (1024 ** $i), $precision);
+        if ($precision !== 0 && strpos((string)$rounded, '.') === false) {
+            $rounded .= '.' . str_repeat('0', $precision);
         }
-        return round($size, $precision) . ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][$i];
+
+        return $rounded . self::$units[$i];
     }
 }
